@@ -3,809 +3,878 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mol Impact V.47: Survivor Guide</title>
+    <title>Mol Impact: V.90 Final Fun</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&family=Kanit:wght@400;800&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&family=Kanit:wght@400;600;800;900&display=swap'); 
         :root {
-            --bg: #20232a; --panel: #2c3e50; --text: #ecf0f1;
-            --gold: #f1c40f; --green: #2ecc71; --red: #c0392b; --blue: #3498db; --dendro: #badc58;
-            --purple: #9b59b6;
+            --bg-dark: #020617;
+            --primary: #6366f1;
+            --accent: #f43f5e;
+            --gold: #fbbf24;
+            --cyan: #06b6d4;
+            --glass: rgba(30, 41, 59, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --poison: #a855f7;
+        }
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background: #0f172a;
+            color: #f1f5f9; margin: 0; position: fixed; inset:0; 
+            overflow: hidden; display: flex; justify-content: center; user-select: none;
+        }
+        #app { 
+            width: 100%; max-width: 480px; height: 100%; 
+            display: flex; flex-direction: column; position: relative; 
+            background: url('https://www.transparenttextures.com/patterns/stardust.png'), radial-gradient(circle at 50% 0%, #1e1b4b, #020617);
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            transition: 0.3s;
+        }
+        /* --- UI COMPONENTS --- */
+        .screen { 
+            position: absolute; inset: 0; z-index: 10; 
+            background: var(--bg-dark); 
+            display: none; flex-direction: column; overflow-y: auto; 
+            padding-bottom: 20px;
+        }
+        .active { display: flex !important; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary), #4338ca);
+            color: white; border: none; padding: 12px; border-radius: 12px;
+            font-family: 'Kanit'; font-size: 1rem; cursor: pointer; 
+            width: 100%; transition: 0.2s; position: relative;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3); text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+        .btn-green { background: linear-gradient(135deg, #10b981, #047857); }
+        .btn-red { background: linear-gradient(135deg, var(--accent), #9f1239); }
+        .btn-cyan { background: linear-gradient(135deg, var(--cyan), #0891b2); }
+        
+        .input-box {
+            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--glass-border);
+            color: white; padding: 12px; border-radius: 12px;
+            font-family: 'Kanit'; font-size: 1.3em; text-align: center;
+            outline: none; width: 100%; box-sizing: border-box; transition: 0.3s;
+        }
+        .input-box:focus { border-color: var(--gold); box-shadow: 0 0 15px rgba(251, 191, 36, 0.2); }
+        
+        /* --- HUD --- */
+        .hud {
+            padding: 10px 15px; background: linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0) 100%);
+            display: flex; gap: 10px; z-index: 50; flex-shrink: 0;
+        }
+        .char-frame {
+            position: relative; width: 60px; height: 60px;
+            background: linear-gradient(135deg, #334155, #0f172a);
+            border-radius: 14px; border: 2px solid var(--glass-border);
+            display: flex; justify-content: center; align-items: center; font-size: 2.5em;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .poison-indicator {
+            position: absolute; top: -5px; right: -5px; background: var(--poison);
+            width: 20px; height: 20px; border-radius: 50%; font-size: 12px;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid #fff; z-index: 10; animation: pulse 1s infinite;
+        }
+        .lv-badge {
+            position: absolute; bottom: -8px; background: var(--gold); color: #000;
+            font-size: 0.7em; font-weight: 900; padding: 2px 6px; border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-family: 'Kanit';
+        }
+        .stat-group { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+        .bar-row { display: flex; align-items: center; gap: 6px; font-size: 0.75em; font-weight: 600; color: #cbd5e1; }
+        .bar-bg { flex: 1; height: 8px; background: rgba(0,0,0,0.6); border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        
+        /* --- STAGE --- */
+        .stage { flex: 1; display: flex; justify-content: space-around; align-items: center; position: relative; }
+        .sprite { font-size: 6em; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transition: 0.3s; position: relative; }
+        
+        /* --- PANEL & FACTOR --- */
+        .panel {
+            background: rgba(15, 23, 42, 0.95); border-radius: 24px 24px 0 0;
+            padding: 20px; backdrop-filter: blur(10px); border-top: 1px solid var(--glass-border);
+            box-shadow: 0 -10px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+            z-index: 60;
+        }
+        .q-card {
+            background: rgba(30, 41, 59, 0.4); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 15px; text-align: center; position: relative;
+            margin-bottom: 15px;
+        }
+        .bonus-tag { 
+            position: absolute; top: -10px; right: 10px; background: var(--accent); 
+            color: white; font-size: 0.7em; padding: 2px 8px; border-radius: 10px;
+            font-weight: bold; box-shadow: 0 0 10px var(--accent); animation: pulse 1s infinite;
         }
 
-        body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); margin: 0; position: fixed; inset:0; overflow: hidden; display: flex; justify-content: center; user-select: none; }
-        #app { width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.8); background: #2c3e50; }
+        /* --- FACTOR CSS --- */
+        .factor-container {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 5px; row-gap: 15px;
+        }
+        .fraction { 
+            display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 2px;
+            font-size: 0.9em; 
+        }
+        .frac-top { 
+            border-bottom: 2px solid #cbd5e1; padding: 2px 6px; 
+            font-weight: 600; color: var(--primary); line-height: 1.2;
+            white-space: nowrap;
+        }
+        .frac-bot { 
+            padding: 2px 6px; 
+            font-weight: 600; color: var(--accent); line-height: 1.2;
+            white-space: nowrap;
+        }
+        .u-canc { opacity: 0.6; text-decoration: line-through; color: #94a3b8; }
+        .x-sign { font-weight: bold; color: #94a3b8; margin: 0 2px; }
 
-        /* SCREENS */
-        .screen { position: absolute; inset: 0; display: none; flex-direction: column; background: var(--bg); z-index: 10; overflow-y: auto; }
+        /* Chest & Calc */
+        .chest-grid { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .chest-item {
+            width: 80px; height: 80px;
+            background: linear-gradient(to bottom, #f59e0b, #92400e);
+            border: 3px solid #fcd34d; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5em; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        .chest-item:hover { transform: scale(1.02); }
+        .chest-item:active { transform: scale(0.95); }
+
+        .ios-calc-btn {
+            width: 50px; height: 50px; background: #ff9500; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 0 #b45309; flex-shrink: 0;
+        }
+        .ios-calc-btn:active { transform: translateY(2px); box-shadow: none; }
+        .calc-overlay {
+            position: absolute; bottom: 0; width: 100%; height: 50%;
+            background: #1e293b; border-radius: 24px 24px 0 0; z-index: 100;
+            display: none; flex-direction: column; padding: 15px; box-sizing: border-box;
+            border-top: 2px solid var(--cyan); animation: slideUp 0.3s;
+        }
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        .calc-op { font-size: 1.6em !important; font-weight: bold; }
+
+        /* Sol Box */
+        .sol-box {
+            background: white; color: #1e293b; border-radius: 16px; 
+            max-width: 500px; width: 95%; margin: auto; max-height: 90vh; display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .sol-content { padding: 20px; overflow-y: auto; font-size: 0.95em; line-height: 1.6; }
         
-        /* START SCREEN */
-        .header { text-align: center; padding: 20px; background: rgba(0,0,0,0.2); }
-        .score-inp-box { text-align: center; margin: 10px 20px; padding: 15px; background: #34495e; border-radius: 12px; border: 1px solid #7f8c8d; }
-        .score-inp { background: #2c3e50; border: 2px solid var(--gold); color: white; padding: 10px; font-size: 1.2em; width: 80px; text-align: center; border-radius: 8px; font-family: 'Kanit'; outline: none; }
+        /* Skills & Class */
+        .skill-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+        .sk-btn { 
+            padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 65px;
+        }
+        .sk-name { font-size: 0.85em; font-weight: bold; line-height: 1.2; }
+        .sk-cost { font-size: 0.7em; opacity: 0.9; margin-top: 2px; }
+
+        .cls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .cls-card {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            padding: 15px; border-radius: 16px; text-align: center; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* Animations */
+        @keyframes atk-r { 0%{transform:translateX(0) scaleX(-1)} 50%{transform:translateX(80px) scaleX(-1)} 100%{transform:translateX(0) scaleX(-1)} }
+        @keyframes atk-l { 0%{transform:translateX(0)} 50%{transform:translateX(-80px)} 100%{transform:translateX(0)} }
+        @keyframes shake { 0%{transform:translate(0,0)} 25%{transform:translate(-5px,5px)} 50%{transform:translate(5px,-5px)} 75%{transform:translate(-5px,-5px)} 100%{transform:translate(0,0)} }
+        @keyframes flash-red { 0%{box-shadow: inset 0 0 0 red;} 50%{box-shadow: inset 0 0 50px red;} 100%{box-shadow: inset 0 0 0 red;} }
         
-        .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 15px; border-radius: 20px; font-size: 0.9em; cursor: pointer; margin-top: 10px; font-family: 'Kanit'; transition: 0.2s; }
-        .btn-guide:active { background: var(--blue); color: white; }
+        .anim-atk-hero { animation: atk-r 0.3s ease-in-out; }
+        .anim-atk-enemy { animation: atk-l 0.3s ease-in-out; }
+        .anim-shake { animation: shake 0.4s; }
+        .anim-dmg { animation: flash-red 0.4s; }
 
-        .class-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 10px 15px; }
-        .class-card { background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 5px; text-align: center; transition: 0.2s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80px; }
-        .class-card:active { transform: scale(0.95); border-color: var(--gold); background: rgba(255,255,255,0.2); }
-        .c-icon { font-size: 24px; margin-bottom: 5px; }
-        .c-name { font-weight: bold; font-family: 'Kanit'; font-size: 0.9em; }
-        .c-desc { font-size: 0.7em; color: #bdc3c7; }
-
-        /* GUIDE SCREEN (New) */
-        #scr-guide { background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 200; padding: 20px; }
-        .guide-box { background: #2c3e50; border: 1px solid var(--gold); border-radius: 15px; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
-        .g-head { background: var(--gold); color: #000; padding: 15px; text-align: center; font-family: 'Kanit'; font-size: 1.5em; font-weight: bold; }
-        .g-body { padding: 20px; overflow-y: auto; font-size: 0.95em; line-height: 1.6; }
-        .g-section { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .g-section h3 { color: var(--blue); font-family: 'Kanit'; margin: 0 0 5px 0; display:flex; align-items:center; gap:5px; }
-        .tag-rule { display: inline-block; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin: 2px; }
-        .curse-h { color: #e74c3c; font-weight: bold; }
-
-        /* HUD */
-        .hud { padding: 10px 15px; background: rgba(0,0,0,0.3); display: flex; gap: 10px; align-items: center; height: 110px; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .avatar { width: 65px; height: 65px; background: rgba(255,255,255,0.1); border: 2px solid var(--gold); border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 30px; position: relative; }
-        .lv-badge { position: absolute; bottom: -5px; right: -5px; background: var(--gold); color: #000; font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 8px; font-family: 'Kanit'; }
-        
-        .stat-box { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-        .bar-wrap { height: 14px; background: rgba(0,0,0,0.5); border-radius: 8px; overflow: hidden; position: relative; }
-        .fill { height: 100%; transition: width 0.3s; }
-        .bar-txt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; text-shadow: 1px 1px 2px #000; z-index: 2; font-family: 'Kanit'; pointer-events: none; }
-        
-        .time-row { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
-        .time-track { flex: 1; height: 6px; background: #555; border-radius: 3px; overflow: hidden; }
-        .time-fill { height: 100%; background: var(--gold); width: 100%; transition: width 1s linear; }
-        .time-val { font-size: 0.8em; color: var(--gold); width: 35px; text-align: right; }
-
-        /* GAMEPLAY */
-        .stage { flex: 1; display: flex; justify-content: space-between; align-items: flex-end; padding: 20px 40px; background: linear-gradient(to bottom, #2c3e50, #20232a); position: relative; }
-        .sprite { font-size: 80px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transition: transform 0.2s; }
-
-        .panel { background: #34495e; padding: 20px; border-radius: 25px 25px 0 0; display: flex; flex-direction: column; gap: 12px; z-index: 20; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
-        .skills { display: flex; gap: 8px; }
-        .sk-btn { flex: 1; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 0; text-align: center; font-size: 0.75em; cursor: pointer; color: #dfe6e9; display: flex; flex-direction: column; align-items: center; transition: background 0.1s; }
-        .sk-btn:active { background: rgba(255,255,255,0.2); transform: scale(0.95); }
-        
-        .q-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; min-height: 100px; text-align: center; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center; position: relative; transition: 0.3s; }
-        /* BONUS STYLE */
-        .q-box.bonus-mode { border: 2px solid var(--gold); background: rgba(241, 196, 15, 0.15); box-shadow: 0 0 15px rgba(241, 196, 15, 0.3); }
-        .bonus-badge { position: absolute; top: -12px; right: -10px; background: var(--gold); color: #000; font-weight: 800; font-family: 'Kanit'; padding: 2px 10px; border-radius: 20px; font-size: 0.8em; transform: rotate(10deg); box-shadow: 0 2px 5px rgba(0,0,0,0.3); animation: pulse 1s infinite; display: none; }
-        .q-box.bonus-mode .bonus-badge { display: block; }
-
-        .topic-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.7em; padding: 2px 8px; border-radius: 10px; font-weight: bold; text-transform: uppercase; }
-        .format-hint { font-size: 0.8em; color: #f39c12; margin-top: 5px; font-weight: bold; }
-
-        .inp-group { display: flex; gap: 10px; height: 55px; }
-        .inp { flex: 1; background: #2c3e50; border: 2px solid #7f8c8d; color: #fff; text-align: center; font-size: 1.5em; border-radius: 12px; font-family: 'Kanit'; outline: none; }
-        .btn-atk { background: var(--green); color: #fff; border: none; padding: 0 20px; border-radius: 12px; font-weight: bold; font-size: 1.2em; font-family: 'Kanit'; cursor: pointer; transition: 0.1s; }
-        .btn-atk:active { transform: scale(0.95); background: #27ae60; }
-
-        /* TUTOR & OVERLAYS */
-        #scr-tutor, #scr-reward, #scr-win { background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
-        
-        .t-card { background: #ecf0f1; color: #2c3e50; border-radius: 20px; padding: 0; width: 100%; max-width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
-        .t-header { padding: 20px; text-align: center; background: #dfe6e9; border-bottom: 1px solid #bdc3c7; flex-shrink: 0; }
-        .t-body { padding: 20px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
-        .t-footer { padding: 15px 20px; background: #dfe6e9; border-top: 1px solid #bdc3c7; flex-shrink: 0; }
-
-        .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #bdc3c7; }
-        .tab-btn { flex: 1; padding: 10px; background: transparent; border: none; border-bottom: 4px solid transparent; cursor: pointer; font-family: 'Kanit'; font-weight: bold; color: #7f8c8d; transition:0.2s; }
-        .tab-btn.active { border-bottom-color: #3498db; color: #3498db; background: rgba(52, 152, 219, 0.1); }
-        
-        .sol-panel { display: none; text-align: left; }
-        .sol-panel.active { display: block; animation: fadeIn 0.3s; }
-
-        .step-box { background: #fff; border-left: 4px solid #3498db; padding: 10px 15px; margin-bottom: 15px; border-radius: 0 8px 8px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .step-title { font-weight: 800; color: #2980b9; font-size: 0.9em; margin-bottom: 5px; text-transform: uppercase; font-family: 'Kanit'; }
-        .step-content { font-size: 1em; color: #2c3e50; line-height: 1.6; }
-        .math-highlight { background: #e8f6f3; padding: 2px 6px; border-radius: 4px; color: #16a085; font-weight: bold; font-family: 'Courier New', monospace; }
-        .cut-unit { text-decoration: line-through; color: #e74c3c; opacity: 0.6; }
-
-        .btn-claim, .btn-restart { width: 100%; padding: 12px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-size: 1.3em; font-family: 'Kanit'; font-weight:bold; cursor: pointer; }
-        .curse-warning { font-size:0.8em; color:#e74c3c; text-align:center; margin-top:5px; background:rgba(231, 76, 60, 0.1); padding:5px; border-radius:5px; }
-
-        .reward-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
-        .r-card { background: #34495e; color: #fff; padding: 15px; border-radius: 12px; border: 2px solid #7f8c8d; cursor: pointer; display: flex; align-items: center; gap: 15px; position:relative; overflow: hidden; }
-        .r-card:active { border-color: var(--gold); transform: translateY(2px); }
-        .r-icon { font-size: 24px; }
-
-        @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .calc-mode .stage { flex: 0; height: 100px; min-height: 100px; overflow: hidden; } 
+        .calc-mode .skill-grid { display: none; }
     </style>
 </head>
 <body>
-
 <div id="app">
-    <div id="scr-class" class="screen" style="display:flex;">
-        <div class="header">
-            <h1 style="font-family:'Kanit'; margin:0; font-size:1.8em;">MOL IMPACT <span style="color:var(--gold)">V.47</span></h1>
-            <p style="color:#bdc3c7; margin-bottom:5px;">Survivor Guide Edition</p>
-            <button class="btn-guide" onclick="toggleGuide(true)">📖 คู่มือการเล่น</button>
+    <div id="scr-landing" class="screen active" style="align-items:center; justify-content:center;">
+        <div style="text-align:center; animation: fadeIn 1s;">
+            <div style="font-size:3.5em; font-family:'Kanit'; font-weight:900; line-height:1; color:white; text-shadow:0 0 40px var(--primary);">MOL<br><span style="color:var(--primary)">IMPACT</span></div>
+            <div style="color:var(--cyan); letter-spacing:5px; font-size:0.8em; margin-top:10px; font-weight:600;">V.90 FINAL FUN</div>
         </div>
-        <div class="score-inp-box">
-            <label style="display:block; margin-bottom:10px; color:var(--gold);">คะแนนกลางภาค (0-20)</label>
-            <input type="number" id="mid-score" class="score-inp" placeholder="0" min="0" max="20">
-        </div>
-        <div class="class-grid">
-            <div class="class-card" style="border-color:#e74c3c" onclick="startGame('Pyro')">
-                <span class="c-icon">🔥</span><div class="c-name">Pyro</div><div class="c-desc">HP สูง</div>
-            </div>
-            <div class="class-card" style="border-color:#3498db" onclick="startGame('Hydro')">
-                <span class="c-icon">💧</span><div class="c-name">Hydro</div><div class="c-desc">MP เยอะ</div>
-            </div>
-            <div class="class-card" style="border-color:#1abc9c" onclick="startGame('Anemo')">
-                <span class="c-icon">🌪️</span><div class="c-name">Anemo</div><div class="c-desc">เวลา +20s</div>
-            </div>
-            <div class="class-card" style="border-color:#badc58" onclick="startGame('Dendro')">
-                <span class="c-icon">🌿</span><div class="c-name">Dendro</div><div class="c-desc">ต้านคำสาป</div>
-            </div>
-            <div class="class-card" style="border-color:#9b59b6; grid-column: span 2;" onclick="startGame('Electro')">
-                <span class="c-icon">⚡</span><div class="c-name">Electro</div><div class="c-desc">สมดุล (HP/MP)</div>
-            </div>
+        <div style="width:80%; max-width:320px; margin-top:40px;">
+            <input type="text" id="p-name" class="input-box" placeholder="ชื่อเล่น (Nickname)" maxlength="10">
+            <button class="btn" onclick="checkName()" style="margin-top:15px;">🚀 เริ่มเกม</button>
+            <button class="btn" style="margin-top:10px; background:transparent; border:1px solid #475569;" onclick="showScreen('scr-howto')">📜 วิธีเล่น</button>
         </div>
     </div>
 
-    <div id="scr-guide" class="screen">
-        <div class="guide-box">
-            <div class="g-head">SURVIVOR GUIDE</div>
-            <div class="g-body">
-                <div class="g-section">
-                    <h3>🏆 เป้าหมาย (Goal)</h3>
-                    <p>ภารกิจของคุณคือทำคะแนนรวมให้ถึง <b>14 คะแนน</b> เพื่อผ่านด่าน!</p>
-                    <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; text-align:center; margin-top:5px;">
-                        <span style="color:var(--gold)">Level (Lv)</span> + 
-                        <span style="color:#3498db">คะแนนกลางภาค</span> ≥ 14
-                    </div>
-                </div>
+    <div id="scr-howto" class="screen" style="padding:25px;">
+        <h2 style="color:var(--gold); text-align:center; margin-bottom:10px;">📜 คู่มือนักผจญภัยเคมี</h2>
+        <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:16px; font-size:0.95em; line-height:1.7;">
+            <div style="margin-bottom:15px;">
+                <b style="color:var(--cyan); font-size:1.1em;">1. ภารกิจของคุณ</b><br>
+                ตอบโจทย์เคมีให้ถูกต้องเพื่อโจมตีมอนสเตอร์! ถ้าตอบผิด... คุณจะโดนโจมตีสวนกลับ!
+            </div>
+            <div style="margin-bottom:15px;">
+                <b style="color:var(--accent); font-size:1.1em;">2. รางวัลแห่งชัยชนะ</b><br>
+                เมื่อตอบถูก คุณจะได้เลือก <b>"หีบสมบัติปริศนา"</b> ซึ่งข้างในอาจมี XP, MP, หรือยาเพิ่มเลือด ...แต่ระวัง! บางกล่องมี <span style="color:var(--poison)">กับดักพิษ</span> ซ่อนอยู่
+            </div>
+            <div style="margin-bottom:15px;">
+                <b style="color:var(--gold); font-size:1.1em;">3. ตัวช่วยพิเศษ</b><br>
+                <ul>
+                    <li><b>Heal:</b> ฟื้นเลือด + แก้พิษ</li>
+                    <li><b>Time:</b> เพิ่มเวลาคิด</li>
+                    <li><b>Hint:</b> บอกใบ้สูตรเด็ด</li>
+                </ul>
+            </div>
+            <div>
+                <b style="color:#10b981;">💡 เคล็ดลับ:</b> พยายามเก็บ XP เพื่อ Level Up แล้วเลือดจะเต็มหลอดทันที!
+            </div>
+        </div>
+        <button class="btn btn-cyan" style="margin-top:20px;" onclick="showScreen('scr-landing')">กลับไปหน้าแรก</button>
+    </div>
 
-                <div class="g-section">
-                    <h3>⚔️ ระบบการเล่น (Gameplay)</h3>
-                    <p>ตอบคำถามเคมีเรื่อง "ปริมาณสารสัมพันธ์" ให้ถูกต้องเพื่อโจมตีศัตรู</p>
-                    <div>
-                        <span class="tag-rule">✅ ตอบถูก</span> ได้รับ EXP + เลือกของรางวัล<br>
-                        <span class="tag-rule">❌ ตอบผิด</span> เสีย HP (ถ้าหมด = Game Over)
-                    </div>
-                </div>
-
-                <div class="g-section">
-                    <h3>🎁 ของรางวัล & คำสาป (Risk)</h3>
-                    <p>เมื่อชนะ เลือกรางวัลเพื่ออัปเกรดตัวละคร แต่ระวัง!</p>
-                    <p class="curse-h">⚠️ มีโอกาส 20% ที่จะโดนคำสาป (เสีย HP แทน)</p>
-                    <small style="color:#bdc3c7">*Dendro 🌿 ป้องกันคำสาปได้ 100%</small>
-                </div>
-                
-                <div class="g-section">
-                    <h3>🌟 Bonus Stage</h3>
-                    <p>บางครั้งจะเจอด่านพิเศษ (กรอบสีทอง) โจทย์ 2 ขั้นตอน</p>
-                    <span class="tag-rule" style="background:var(--gold); color:#000; font-weight:bold;">EXP x2</span> 
-                    <span class="tag-rule" style="background:var(--gold); color:#000; font-weight:bold;">รางวัลคูณสอง</span>
-                </div>
-
-                <button class="btn-claim" onclick="toggleGuide(false)">เข้าใจแล้ว! (Close)</button>
+    <div id="scr-class" class="screen" style="padding:25px;">
+        <h2 style="text-align:center; color:var(--gold);">เลือกสายการเรียน</h2>
+        <div style="text-align:center; margin-bottom:15px;">
+            <label style="color:#94a3b8; font-size:0.9em;">คะแนนสอบกลางภาค (0-20)</label>
+            <input type="number" id="mid-score" class="input-box" style="padding:8px; font-size:1em; width:120px; margin-top:5px;" placeholder="ใส่คะแนน">
+        </div>
+        <div class="cls-grid">
+            <div class="cls-card" onclick="startGame('Pyro')">
+                <div style="font-size:35px;">🔥</div><div style="font-weight:bold; color:var(--accent);">Pyro</div>
+                <div style="font-size:0.75em; color:#cbd5e1;">Max HP สูง</div>
+            </div>
+            <div class="cls-card" onclick="startGame('Hydro')">
+                <div style="font-size:35px;">💧</div><div style="font-weight:bold; color:var(--primary);">Hydro</div>
+                <div style="font-size:0.75em; color:#cbd5e1;">Max MP สูง</div>
+            </div>
+            <div class="cls-card" onclick="startGame('Dendro')">
+                <div style="font-size:35px;">🌿</div><div style="font-weight:bold; color:#10b981;">Dendro</div>
+                <div style="font-size:0.75em; color:#cbd5e1;">EXP Bonus</div>
+            </div>
+            <div class="cls-card" onclick="startGame('Electro')">
+                <div style="font-size:35px;">⚡</div><div style="font-weight:bold; color:var(--gold);">Electro</div>
+                <div style="font-size:0.75em; color:#cbd5e1;">Lucky</div>
             </div>
         </div>
     </div>
 
     <div id="scr-game" class="screen">
         <div class="hud">
-            <div class="avatar" id="u-icon">🔥</div>
-            <div class="stat-box">
-                <div class="bar-wrap"><div class="bar-txt" id="hp-txt">HP</div><div id="hp-bar" class="fill" style="background:var(--red); width:100%"></div></div>
-                <div class="bar-wrap"><div class="bar-txt" id="mp-txt">MP</div><div id="mp-bar" class="fill" style="background:var(--blue); width:100%"></div></div>
-                <div class="bar-wrap"><div class="bar-txt" id="xp-txt">EXP</div><div id="xp-bar" class="fill" style="background:var(--green); width:0%"></div></div>
-                
-                <div class="time-row">
-                    <div class="time-track"><div id="t-bar" class="time-fill"></div></div>
-                    <div id="t-txt" class="time-val">60s</div>
+            <div class="char-frame" onclick="showStats()">
+                <span id="p-icon">🧙‍♂️</span>
+                <div class="lv-badge" id="lv-txt">Lv.1</div>
+                <div id="poison-mark" class="poison-indicator" style="display:none;">☠️</div>
+            </div>
+            <div class="stat-group">
+                <div class="bar-row">
+                    <span>HP</span><div class="bar-bg"><div id="hp-bar" class="bar-fill" style="width:100%; background:var(--accent);"></div></div>
+                </div>
+                <div class="bar-row">
+                    <span>MP</span><div class="bar-bg"><div id="mp-bar" class="bar-fill" style="width:100%; background:var(--primary);"></div></div>
+                </div>
+                <div class="bar-row">
+                    <span style="color:var(--gold)">XP</span><div class="bar-bg"><div id="xp-bar" class="bar-fill" style="width:0%; background:var(--gold);"></div></div>
+                </div>
+                <div class="bar-row" style="margin-top:2px; justify-content:space-between;">
+                    <span id="score-txt" style="color:var(--cyan); font-weight:bold;">0 คะแนน</span>
                 </div>
             </div>
         </div>
-        
+        <div style="height:4px; background:black; width:100%; flex-shrink:0;"><div id="time-bar" style="height:100%; width:100%; background:var(--cyan); transition: width 1s linear;"></div></div>
         <div class="stage">
-            <div class="sprite" id="u-sprite" style="transform: scaleX(-1);">🔥</div>
-            <div class="sprite">👻</div>
+            <div class="sprite" id="hero-img" style="transform: scaleX(-1);">🧙‍♂️</div>
+            <div class="sprite" id="enemy-img">👾</div>
         </div>
-
         <div class="panel">
-            <div class="skills" id="skill-box"></div>
-            <div id="q-box" class="q-box">
-                <div class="bonus-badge">★ BONUS x2 ★</div>
+            <div class="skill-grid">
+                <button class="btn btn-green sk-btn" onclick="useSkill('heal')">
+                    <span class="sk-name">💖 Heal</span><span class="sk-cost">20 MP</span>
+                </button>
+                <button class="btn btn-cyan sk-btn" onclick="useSkill('time')">
+                    <span class="sk-name">⏳ Time</span><span class="sk-cost">15 MP</span>
+                </button>
+                <button class="btn sk-btn" style="background:#475569;" onclick="useSkill('hint')">
+                    <span class="sk-name">💡 Hint</span><span class="sk-cost">10 MP</span>
+                </button>
+                <button class="btn btn-red sk-btn" onclick="useSkill('skip')">
+                    <span class="sk-name">⏭️ Skip</span><span class="sk-cost">30 MP</span>
+                </button>
+            </div>
+            <div class="q-card" id="q-card-box">
+                <div id="bonus-badge" class="bonus-tag" style="display:none;">🔥 BONUS</div>
+                <div style="font-size:0.9em; color:var(--primary); font-weight:bold; font-family:'Kanit';" id="q-topic">TOPIC</div>
+                <div id="q-main" style="font-size:1.1em; font-weight:bold; margin:8px 0;">...</div>
+                <div id="q-sub" style="color:#94a3b8; font-size:0.9em;">...</div>
+                <div id="q-hint-box" style="display:none; margin-top:5px; padding:5px; background:rgba(251,191,36,0.1); border-radius:8px; color:var(--gold); font-size:0.9em;"></div>
+            </div>
+            <form id="ans-form" style="display:flex; gap:10px;">
+                <div class="ios-calc-btn" onclick="toggleCalc()">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="white" stroke-width="3" fill="none"><path d="M6 3 L6 21 M3 6 L21 6 M16 16 L20 20 M20 16 L16 20"></path></svg>
                 </div>
-            <div class="inp-group">
-                <input type="number" id="ans-in" class="inp" placeholder="คำตอบ..." inputmode="decimal" step="any">
-                <button class="btn-atk" onclick="checkAns()">Attack</button>
-            </div>
+                <input type="number" id="ans-in" class="input-box" placeholder="คำตอบ" step="any" autocomplete="off">
+                <button type="submit" class="btn" style="width:auto; min-width:80px;">⚔️</button>
+            </form>
         </div>
     </div>
 
-    <div id="scr-tutor">
-        <div class="t-card">
-            <div class="t-header">
-                <h2 id="res-title" style="margin:0; font-family:'Kanit';">Result</h2>
-                <div id="feed-box" style="background:#fab1a0; color:#c0392b; padding:8px; border-radius:6px; margin-top:10px; font-size:0.9em; display:none;"></div>
+    <div id="scr-result" class="screen" style="background:rgba(0,0,0,0.85); align-items:center; justify-content:center; padding:10px;">
+        <div class="sol-box">
+            <div style="padding:15px; background:#f1f5f9; text-align:center; border-bottom:1px solid #e2e8f0;">
+                <h2 id="res-title" style="margin:0;"></h2>
+                <div id="res-reward" style="margin-top:10px; color:#d97706; font-weight:bold; display:none;"></div>
+                <p style="margin:5px 0 0; color:#64748b; font-size:0.9em;">ตอบ: <b id="tut-ans" style="color:var(--primary)"></b></p>
             </div>
-            
-            <div class="t-body">
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="switchTab('factor')" id="btn-factor">⚗️ ตัดหน่วย (Factor)</button>
-                    <button class="tab-btn" onclick="switchTab('formula')" id="btn-formula">📐 ใช้สูตร (Formula)</button>
-                </div>
-                <div id="sol-factor" class="sol-panel active"></div>
-                <div id="sol-formula" class="sol-panel"></div>
-            </div>
-
-            <div class="t-footer">
-                <button id="btn-action" class="btn-claim" onclick="goToReward()">🎁 เลือกรางวัล</button>
-            </div>
+            <div class="sol-content" id="sol-content"></div>
+            <button id="res-btn" class="btn" style="border-radius:0; margin-top:auto;" onclick="closeResult()">ไปต่อ</button>
         </div>
     </div>
 
-    <div id="scr-reward" style="display:none;">
-        <div class="t-card" style="background:#2c3e50; border:1px solid var(--gold); padding:20px;">
-            <h2 style="color:var(--gold); font-family:'Kanit'; margin:0; text-align:center;">LEVEL UP!</h2>
-            <div class="curse-warning">⚠️ ระวัง! รางวัลมีความเสี่ยง 20% ที่เลือดจะลด</div>
-            <div class="reward-grid">
-                <div class="r-card" onclick="claimReward('xp')"><div class="r-icon">📚</div><div><h4>EXP Boost</h4></div></div>
-                <div class="r-card" onclick="claimReward('mp')"><div class="r-icon">💧</div><div><h4>Mana Refill</h4></div></div>
-                <div class="r-card" onclick="claimReward('cost')"><div class="r-icon">📉</div><div><h4>Skill Mastery</h4></div></div>
+    <div id="scr-chest" class="screen" style="background:rgba(0,0,0,0.9); align-items:center; justify-content:center; padding:20px;">
+        <div style="text-align:center;">
+            <div style="font-size:3em; margin-bottom:10px;">🗝️</div>
+            <h2 style="color:var(--gold); margin:0;">เลือกหีบรางวัล</h2>
+            <div class="chest-grid">
+                <div class="chest-item" onclick="selectChest(1)">📦</div>
+                <div class="chest-item" onclick="selectChest(2)">📦</div>
+                <div class="chest-item" onclick="selectChest(3)">📦</div>
             </div>
+            <div id="chest-result" style="margin-top:20px; min-height:50px; font-size:1.1em; font-weight:bold;"></div>
+            <button id="chest-next-btn" class="btn" onclick="finishChest()" style="margin-top:20px; display:none; width:200px; margin-left:auto; margin-right:auto;">เดินทางต่อ</button>
         </div>
     </div>
 
-    <div id="scr-win">
-        <div class="t-card" style="text-align:center; background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000; padding:30px;">
-            <div style="font-size:60px;">🏆</div>
-            <h1 style="margin:0;">MISSION COMPLETE</h1>
-            <p>คะแนนรวม: <span id="win-total" style="font-weight:bold; font-size:1.5em;">0</span> / 14</p>
-            <button class="btn-restart" onclick="resetGame()">🔄 เล่นใหม่อีกครั้ง</button>
+    <div id="scr-win" class="screen" style="background:rgba(0,0,0,0.95); align-items:center; justify-content:center; text-align:center;">
+        <div style="font-size:5em;">🏆</div>
+        <h1 style="color:var(--gold);">CONGRATS!</h1>
+        <p>คุณสอบผ่านแล้ว!</p>
+        <p>คะแนนรวม: <span id="final-score"></span></p>
+        <button class="btn" style="width:200px; margin-top:20px;" onclick="resetGame()">เล่นใหม่</button>
+    </div>
+
+    <div id="calc" class="calc-overlay">
+        <input id="c-disp" type="text" readonly style="width:100%; background:transparent; border:none; text-align:right; font-size:2.5em; color:white; margin-bottom:10px; font-family:'Kanit';" placeholder="0">
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; flex:1;">
+            <button onclick="cClr()" style="background:var(--accent); color:white; border:none; border-radius:8px;">C</button>
+            <button onclick="cDel()" style="background:#475569; color:white; border:none; border-radius:8px;">←</button>
+            <button onclick="cIn('/')" class="calc-op" style="background:var(--gold); color:black; border:none; border-radius:8px;">÷</button>
+            <button onclick="cIn('*')" class="calc-op" style="background:var(--gold); color:black; border:none; border-radius:8px;">×</button>
+            <button onclick="cIn('7')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">7</button>
+            <button onclick="cIn('8')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">8</button>
+            <button onclick="cIn('9')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">9</button>
+            <button onclick="cIn('-')" class="calc-op" style="background:var(--gold); color:black; border:none; border-radius:8px;">-</button>
+            <button onclick="cIn('4')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">4</button>
+            <button onclick="cIn('5')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">5</button>
+            <button onclick="cIn('6')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">6</button>
+            <button onclick="cIn('+')" class="calc-op" style="background:var(--gold); color:black; border:none; border-radius:8px;">+</button>
+            <button onclick="cIn('1')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">1</button>
+            <button onclick="cIn('2')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">2</button>
+            <button onclick="cIn('3')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">3</button>
+            <button onclick="cEval()" style="grid-row:span 2; background:var(--primary); color:white; border:none; border-radius:8px; font-size:1.5em;">=</button>
+            <button onclick="cIn('0')" style="grid-column:span 2; background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">0</button>
+            <button onclick="cIn('.')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">.</button>
         </div>
+        <div style="text-align:center; color:#94a3b8; margin-top:5px; cursor:pointer;" onclick="toggleCalc()">🔻 ปิด</div>
     </div>
 </div>
 
 <script>
-    // --- AUDIO SYSTEM ---
-    const sfx = {
-        ctx: null,
-        init: function() {
-            window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            this.ctx = new AudioContext();
-        },
-        play: function(type) {
-            if (!this.ctx) this.init();
-            const now = this.ctx.currentTime;
-            const o = this.ctx.createOscillator();
-            const g = this.ctx.createGain();
-            o.connect(g); g.connect(this.ctx.destination);
-
-            if (type === 'atk') {
-                o.type = 'square'; o.frequency.setValueAtTime(400, now);
-                o.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-                g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                o.start(now); o.stop(now + 0.1);
-            } else if (type === 'correct') {
-                o.type = 'sine'; o.frequency.setValueAtTime(600, now);
-                g.gain.setValueAtTime(0.1, now); g.gain.linearRampToValueAtTime(0, now + 0.1);
-                o.start(now); o.stop(now + 0.1);
-                setTimeout(()=>{
-                    const o2=this.ctx.createOscillator(); const g2=this.ctx.createGain();
-                    o2.connect(g2); g2.connect(this.ctx.destination);
-                    o2.frequency.setValueAtTime(900, this.ctx.currentTime);
-                    g2.gain.setValueAtTime(0.1, this.ctx.currentTime); g2.gain.linearRampToValueAtTime(0, this.ctx.currentTime+0.2);
-                    o2.start(this.ctx.currentTime); o2.stop(this.ctx.currentTime+0.2);
-                },100);
-            } else if (type === 'bonus') {
-                o.type = 'triangle'; 
-                [523, 659, 784, 1046].forEach((f, i) => {
-                    setTimeout(() => {
-                        const osc = this.ctx.createOscillator(); const gn = this.ctx.createGain();
-                        osc.connect(gn); gn.connect(this.ctx.destination);
-                        osc.frequency.value = f; osc.type='sine';
-                        gn.gain.setValueAtTime(0.1, this.ctx.currentTime); gn.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime+0.3);
-                        osc.start(this.ctx.currentTime); osc.stop(this.ctx.currentTime+0.3);
-                    }, i*100);
-                });
-            } else if (type === 'wrong') {
-                o.type = 'sawtooth'; o.frequency.setValueAtTime(150, now);
-                o.frequency.linearRampToValueAtTime(100, now + 0.3);
-                g.gain.setValueAtTime(0.1, now); g.gain.linearRampToValueAtTime(0, now + 0.3);
-                o.start(now); o.stop(now + 0.3);
-            } else if (type === 'skill') {
-                o.type = 'triangle'; o.frequency.setValueAtTime(300, now);
-                o.frequency.linearRampToValueAtTime(800, now + 0.5);
-                g.gain.setValueAtTime(0.05, now); g.gain.linearRampToValueAtTime(0, now + 0.5);
-                o.start(now); o.stop(now + 0.5);
-            } else if (type === 'level') {
-                [440, 554, 659, 880].forEach((f, i) => {
-                    setTimeout(() => {
-                        const os = this.ctx.createOscillator(); const gn = this.ctx.createGain();
-                        os.connect(gn); gn.connect(this.ctx.destination);
-                        os.type = 'square'; os.frequency.value = f;
-                        gn.gain.value = 0.05; gn.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime+0.2);
-                        os.start(this.ctx.currentTime); os.stop(this.ctx.currentTime+0.2);
-                    }, i*100);
-                });
-            }
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+    
+    // --- UPDATED SOUND LOGIC ---
+    function playSfx(type) {
+        if(ctx.state === 'suspended') ctx.resume();
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        const now = ctx.currentTime;
+        
+        if(type==='atk'){ 
+            // Sharp High Pitch (Success)
+            osc.frequency.setValueAtTime(400,now); 
+            osc.frequency.exponentialRampToValueAtTime(800,now+0.1); 
+            gain.gain.setValueAtTime(0.1,now); 
+            gain.gain.linearRampToValueAtTime(0,now+0.1); 
+            osc.start(now); osc.stop(now+0.1); 
         }
-    };
-
-    // --- DATABASE ---
-    const AM = { H:1, C:12, N:14, O:16, Na:23, S:32, Cl:35.5, K:39, Ca:40, Mn:55 };
+        else if(type==='wrong'){
+            // Low Discordant Pitch (Failure)
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150,now); 
+            osc.frequency.linearRampToValueAtTime(100,now+0.3); 
+            gain.gain.setValueAtTime(0.2,now); 
+            gain.gain.linearRampToValueAtTime(0,now+0.3); 
+            osc.start(now); osc.stop(now+0.3); 
+        }
+        else if(type==='win'){ 
+            // Victory Melody
+            osc.type='triangle'; 
+            osc.frequency.setValueAtTime(523.25, now); // C
+            osc.frequency.setValueAtTime(659.25, now + 0.1); // E
+            osc.frequency.setValueAtTime(783.99, now + 0.2); // G
+            osc.frequency.setValueAtTime(1046.50, now + 0.3); // High C
+            gain.gain.setValueAtTime(0.1, now); 
+            gain.gain.linearRampToValueAtTime(0, now + 0.6); 
+            osc.start(now); osc.stop(now + 0.6); 
+        }
+    }
 
     const DB = [
-        { f:"H₂O", name:"น้ำ", mw:18, d:1.00, atoms:{H:2, O:1}, type:'cov' },
-        { f:"CO₂", name:"คาร์บอนไดออกไซด์", mw:44, d:null, atoms:{C:1, O:2}, type:'cov' },
-        { f:"NH₃", name:"แอมโมเนีย", mw:17, d:0.73, atoms:{N:1, H:3}, type:'cov' },
-        { f:"CH₄", name:"มีเทน", mw:16, d:null, atoms:{C:1, H:4}, type:'cov' },
-        { f:"NaCl", name:"เกลือแกง", mw:58.5, d:2.16, atoms:{Na:1, Cl:1}, type:'ion' },
-        { f:"H₂SO₄", name:"กรดซัลฟิวริก", mw:98, d:1.83, atoms:{H:2, S:1, O:4}, type:'cov' },
-        { f:"HCl", name:"กรดเกลือ", mw:36.5, d:1.18, atoms:{H:1, Cl:1}, type:'cov' },
-        { f:"NaOH", name:"โซดาไฟ", mw:40, d:2.13, atoms:{Na:1, O:1, H:1}, type:'ion' },
-        { f:"HNO₃", name:"กรดไนทริก", mw:63, d:1.51, atoms:{H:1, N:1, O:3}, type:'cov' },
-        { f:"CaCO₃", name:"หินปูน", mw:100, d:2.71, atoms:{Ca:1, C:1, O:3}, type:'ion' },
-        { f:"KMnO₄", name:"ด่างทับทิม", mw:158, d:2.70, atoms:{K:1, Mn:1, O:4}, type:'ion' },
-        { f:"C₆H₁₂O₆", name:"กลูโคส", mw:180, d:1.54, atoms:{C:6, H:12, O:6}, type:'cov' },
-        { f:"O₂", name:"แก๊สออกซิเจน", mw:32, d:null, atoms:{O:2}, type:'cov' }
+        { f:"H₂O", mw:18, d:1.0, type:'covalent', atom:{'H':2,'O':1}, total:3, n:"น้ำ" },
+        { f:"CO₂", mw:44, d:null, type:'covalent', atom:{'C':1,'O':2}, total:3, n:"คาร์บอนไดออกไซด์" },
+        { f:"CH₄", mw:16, d:0.66, type:'covalent', atom:{'C':1,'H':4}, total:5, n:"มีเทน" },
+        { f:"NH₃", mw:17, d:0.77, type:'covalent', atom:{'N':1,'H':3}, total:4, n:"แอมโมเนีย" },
+        { f:"C₆H₁₂O₆", mw:180, d:1.54, type:'covalent', atom:{'C':6,'H':12,'O':6}, total:24, n:"กลูโคส" },
+        { f:"H₂SO₄", mw:98, d:1.83, type:'covalent', atom:{'H':2,'S':1,'O':4}, total:7, n:"กรดซัลฟิวริก" },
+        { f:"NaCl", mw:58.5, d:2.16, type:'ionic', atom:{'Na':1,'Cl':1}, total:2, n:"โซเดียมคลอไรด์" },
+        { f:"CaCO₃", mw:100, d:2.71, type:'ionic', atom:{'Ca':1,'C':1,'O':3}, total:5, n:"แคลเซียมคาร์บอเนต" },
+        { f:"KMnO₄", mw:158, d:2.7, type:'ionic', atom:{'K':1,'Mn':1,'O':4}, total:6, n:"ด่างทับทิม" },
+        { f:"He", mw:4, d:null, type:'element', atom:{'He':1}, total:1, n:"ฮีเลียม" },
+        { f:"Ne", mw:20, d:null, type:'element', atom:{'Ne':1}, total:1, n:"นีออน" },
+        { f:"Fe", mw:56, d:7.87, type:'element', atom:{'Fe':1}, total:1, n:"เหล็ก" }
     ];
 
-    let g = { 
-        hp:100, maxH:100, mp:50, maxM:50, xp:0, lv:1, cls:'',
-        ans:0, qData:null, timer:null, tMax:60, tLeft:60,
-        midScore: 0, skillCostMod: 1.0, isCorrect: false,
-        weaknessQueue: [], isBonus: false
+    const TopicNames = {
+        'mol_g': 'โมล ⮕ มวล (g)',
+        'g_mol': 'มวล (g) ⮕ โมล',
+        'mol_dm3': 'โมล ⮕ ปริมาตรแก๊ส (STP)',
+        'dm3_mol': 'ปริมาตรแก๊ส (STP) ⮕ โมล',
+        'mol_part': 'โมล ⮕ จำนวนอนุภาค',
+        'part_mol': 'จำนวนอนุภาค ⮕ โมล',
+        'mol_atom_count': 'โมลสาร ⮕ โมลอะตอมรวม',
+        'mol_elem_stoich': 'โมลสาร ⮕ โมลธาตุองค์ประกอบ',
+        'mw_calc': 'คำนวณมวลโมเลกุล (MW)',
+        'density_m_v': 'ความหนาแน่น: มวล ⮕ ปริมาตร',
+        'density_v_m': 'ความหนาแน่น: ปริมาตร ⮕ มวล',
+        'challenge_g_dm3': 'BONUS: มวล ⮕ ปริมาตร (STP)',
+        'challenge_part_g': 'BONUS: อนุภาค ⮕ มวล'
     };
 
-    // --- GAME CONTROL ---
-    function toggleGuide(show) {
-        sfx.play('skill');
-        document.getElementById('scr-guide').style.display = show ? 'flex' : 'none';
-    }
+    const PositivePhrases = [
+        "เก่งมาก! 👍", "สุดยอดไปเลย! 🌟", "ถูกต้องนะครับ! ✅", 
+        "เฉียบขาด! ⚔️", "เยี่ยมยอด! 🤩", "ความพยายามอยู่ที่ไหน ความสำเร็จอยู่ที่นั่น! ✌️"
+    ];
 
+    let g = { hp:100, maxHp:100, mp:50, maxMp:50, xp:0, maxXp:25, lv:1, examScore:0, targetScore:14, q:null, timer:null, tMax:60, tCur:60, cls:'Pyro', isPoisoned:false, isBonus:false };
+
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function checkName() { if(document.getElementById('p-name').value) showScreen('scr-class'); }
     function startGame(cls) {
-        sfx.init(); sfx.play('skill');
-        let sc = document.getElementById('mid-score').value;
-        if(sc === '' || sc < 0 || sc > 20) return alert("กรุณากรอกคะแนน (0-20)");
-        g.midScore = parseInt(sc); g.cls = cls;
-
-        if(cls==='Pyro'){ g.maxH=150; g.maxM=50; g.icon='🔥'; g.tMax=60; }
-        else if(cls==='Hydro'){ g.maxH=100; g.maxM=120; g.icon='💧'; g.tMax=60; }
-        else if(cls==='Anemo'){ g.maxH=100; g.maxM=80; g.icon='🌪️'; g.tMax=80; }
-        else if(cls==='Dendro'){ g.maxH=120; g.maxM=80; g.icon='🌿'; g.tMax=60; }
-        else if(cls==='Electro'){ g.maxH=110; g.maxM=90; g.icon='⚡'; g.tMax=60; }
-        
-        g.hp=g.maxH; g.mp=g.maxM; g.tLeft=g.tMax; g.xp=0; g.lv=1; g.weaknessQueue=[];
-        document.getElementById('u-icon').innerHTML = g.icon + `<div class="lv-badge">Lv.${g.lv}</div>`;
-        document.getElementById('u-sprite').innerText = g.icon;
-        document.getElementById('scr-class').style.display='none';
-        document.getElementById('scr-game').style.display='flex';
-        renderSkills(); updateUI(); genQuest();
+        let sc = parseInt(document.getElementById('mid-score').value);
+        if(isNaN(sc)||sc<0||sc>20) return alert("กรอกคะแนน 0-20");
+        g.examScore = sc; g.cls = cls; g.maxHp = (cls==='Pyro')?150:100; g.maxMp = (cls==='Hydro')?100:50;
+        g.hp=g.maxHp; g.mp=g.maxMp; g.xp=0; g.lv=1; g.isPoisoned=false;
+        updateHUD(); nextQuest(); showScreen('scr-game');
     }
-
-    function resetGame() {
-        clearInterval(g.timer);
-        document.getElementById('scr-win').style.display = 'none';
-        document.getElementById('scr-game').style.display = 'none';
-        document.getElementById('scr-tutor').style.display = 'none';
-        document.getElementById('scr-reward').style.display = 'none';
-        document.getElementById('scr-guide').style.display = 'none';
-        document.getElementById('scr-class').style.display = 'flex';
-        document.getElementById('ans-in').value = '';
-        document.getElementById('q-box').classList.remove('bonus-mode');
-    }
-
-    function renderSkills() {
-        const skills = [
-            { id:'heal', name:'Heal', icon:'💖', base:20 },
-            { id:'time', name:'Time', icon:'⏳', base:15 },
-            { id:'hint', name:'Hint', icon:'💡', base:10 },
-            { id:'skip', name:'Skip', icon:'⏩', base:30 }
-        ];
-        let html = '';
-        skills.forEach(s => {
-            html += `<div class="sk-btn" onclick="useSkill('${s.id}', ${s.base})">
-                        <div style="font-size:1.4em">${s.icon}</div>${s.name} <span style="font-size:0.7em; color:#3498db">${s.base} MP</span>
-                     </div>`;
+    
+    const factorBox = (steps) => {
+        let h = `<div class="factor-container">`;
+        steps.forEach((s,i) => {
+            if(i>0) h+=`<div class="x-sign">×</div>`;
+            h += `<div class="fraction"><span class="frac-top">${s.top}</span><span class="frac-bot">${s.bot}</span></div>`;
         });
-        document.getElementById('skill-box').innerHTML = html;
+        if(steps.length > 0 && steps[steps.length-1].res) {
+            h += `<div>= <b style="color:var(--gold)">${steps[steps.length-1].res}</b></div>`;
+        }
+        h += `</div>`;
+        return h;
+    };
+    
+    const formulaBox = (vars, form, sub, ans) => {
+        return `
+            <div style="background:rgba(6,182,212,0.1); padding:8px; border-radius:8px; border-left:3px solid var(--cyan);">
+                <div style="font-size:0.9em; color:#94a3b8; line-height:1.4;">${vars}</div>
+                <div style="margin-top:4px;"><b>สูตร:</b> ${form}</div>
+                <div><b>แทนค่า:</b> ${sub}</div>
+                <div><b>ตอบ:</b> <span style="color:var(--cyan); font-weight:bold;">${ans}</span></div>
+            </div>
+        `;
     }
 
-    // --- LOGIC: NORMAL & BONUS ---
+    function getUnitName(type) {
+        if(type === 'ionic') return { s:'fu', l:'หน่วยสูตร' };
+        if(type === 'element') return { s:'atom', l:'อะตอม' };
+        return { s:'mc', l:'โมเลกุล' };
+    }
+
     function genQuest() {
-        clearInterval(g.timer);
-        g.tLeft = g.tMax;
-        startTimer();
+        // Auto Reset Calc & Hint
+        cClr();
+        document.getElementById('q-hint-box').style.display = 'none';
+        document.getElementById('q-hint-box').innerHTML = '';
+
+        g.isBonus = Math.random() < 0.2; 
+        let c = DB[Math.floor(Math.random()*DB.length)];
+        let n = (Math.random()*2 + 0.5).toFixed(1);
+        let q = {};
+        
+        const topicsBasic = ['mol_g', 'g_mol', 'mol_dm3', 'dm3_mol', 'mol_part', 'part_mol', 'mw_calc'];
+        const topicsAdv = ['mol_atom_count', 'mol_elem_stoich', 'density_m_v', 'density_v_m'];
+        const topicsHard = ['challenge_g_dm3', 'challenge_part_g'];
+        
+        let pool = g.isBonus ? topicsHard : [...topicsBasic, ...topicsAdv];
+        if(!c.d) pool = pool.filter(t => !t.includes('density'));
+        
+        let type = pool[Math.floor(Math.random()*pool.length)];
+        let uInfo = getUnitName(c.type);
+
+        let u_mol = `<span class="u-canc">mol</span>`;
+        let u_g = `<span class="u-canc">g</span>`;
+        let u_dm3 = `<span class="u-canc">dm³</span>`;
+        let u_part = `<span class="u-canc">${uInfo.s}</span>`;
+        
+        let showMW = (type.includes('g') || type.includes('mw') || type === 'density_m_v' || type === 'density_v_m') ? ` (MW = ${c.mw})` : "";
+        if(type === 'mw_calc') showMW = "";
+
+        document.getElementById('bonus-badge').style.display = g.isBonus ? 'block' : 'none';
+
+        switch(type) {
+            case 'mol_g':
+                q.ans = n * c.mw; q.unit = "g";
+                q.txt = `${c.f}${showMW} จำนวน ${n} mol มีมวลกี่กรัม?`;
+                q.sol1 = factorBox([{top:`${n} ${u_mol} ${c.f}`, bot:"1"}, {top:`${c.mw} g ${c.f}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} g`}]);
+                q.desc = `ตัดหน่วย mol ทิ้ง เหลือหน่วย g`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>n (โมล) = ${n} mol<br>MW (มวลโมเลกุล) = ${c.mw} g/mol`, 
+                    `m = n × MW <br><small style='color:#cbd5e1'>(m = มวลสาร)</small>`, 
+                    `m = ${n} × ${c.mw}`, 
+                    `${q.ans.toFixed(2)} g`
+                );
+                break;
+            case 'g_mol':
+                let mass = (n * c.mw).toFixed(1); q.ans = mass/c.mw; q.unit = "mol";
+                q.txt = `${c.f}${showMW} มวล ${mass} g คิดเป็นกี่โมล?`;
+                q.sol1 = factorBox([{top:`${mass} ${u_g} ${c.f}`, bot:"1"}, {top:`1 mol ${c.f}`, bot:`${c.mw} ${u_g} ${c.f}`, res:`${q.ans.toFixed(2)} mol`}]);
+                q.desc = `ตัดหน่วย g ทิ้ง เหลือหน่วย mol`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>m (มวลสาร) = ${mass} g<br>MW (มวลโมเลกุล) = ${c.mw} g/mol`, 
+                    `n = m / MW <br><small style='color:#cbd5e1'>(n = โมล)</small>`, 
+                    `n = ${mass} / ${c.mw}`, 
+                    `${q.ans.toFixed(2)} mol`
+                );
+                break;
+            case 'mol_dm3':
+                q.ans = n * 22.4; q.unit = "dm³";
+                q.txt = `${c.f} (STP) จำนวน ${n} mol มีปริมาตรเท่าใด?`;
+                q.sol1 = factorBox([{top:`${n} ${u_mol} ${c.f}`, bot:"1"}, {top:`22.4 dm³ STP`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} dm³`}]);
+                q.desc = `ใช้ 22.4 dm³ ที่ STP ต่อ 1 mol`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>n (โมล) = ${n} mol<br>C (ค่าคงที่ STP) = 22.4 dm³/mol`, 
+                    `V = n × 22.4 <br><small style='color:#cbd5e1'>(V = ปริมาตร STP)</small>`, 
+                    `V = ${n} × 22.4`, 
+                    `${q.ans.toFixed(2)} dm³`
+                );
+                break;
+            case 'dm3_mol':
+                let v = (n * 22.4).toFixed(1); q.ans = v/22.4; q.unit = "mol";
+                q.txt = `${c.f} (STP) ปริมาตร ${v} dm³ คิดเป็นกี่โมล?`;
+                q.sol1 = factorBox([{top:`${v} ${u_dm3}`, bot:"1"}, {top:`1 mol ${c.f}`, bot:`22.4 ${u_dm3}`, res:`${q.ans.toFixed(2)} mol`}]);
+                q.desc = `เปลี่ยนปริมาตรเป็นโมล หารด้วย 22.4`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>V (ปริมาตร STP) = ${v} dm³`, 
+                    `n = V / 22.4 <br><small style='color:#cbd5e1'>(n = โมล)</small>`, 
+                    `n = ${v} / 22.4`, 
+                    `${q.ans.toFixed(2)} mol`
+                );
+                break;
+            case 'mol_part':
+                q.ans = n * 6.02; q.unit = "×10²³";
+                q.txt = `${c.f} จำนวน ${n} mol มีกี่${uInfo.l}? (ตอบเฉพาะเลขข้างหน้า ×10²³)`;
+                q.sol1 = factorBox([{top:`${n} ${u_mol} ${c.f}`, bot:"1"}, {top:`6.02×10²³ ${uInfo.s}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)}×10²³ ${uInfo.s}`}]);
+                q.desc = `ใช้เลขอาโวกาโดร 6.02×10²³ ต่อ 1 mol`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>n (โมล) = ${n} mol<br>Av (เลขอาโวกาโดร) = 6.02×10²³`, 
+                    `N = n × 6.02×10²³ <br><small style='color:#cbd5e1'>(N = จำนวนอนุภาค)</small>`, 
+                    `N = ${n} × 6.02 (ตัด 10²³ ไว้ตอบในหน่วย)`, 
+                    `${q.ans.toFixed(2)}×10²³`
+                );
+                break;
+            case 'part_mol':
+                let p = (n * 6.02).toFixed(2); q.ans = p/6.02; q.unit = "mol";
+                q.txt = `${c.f} จำนวน ${p}×10²³ ${uInfo.l} คิดเป็นกี่โมล?`;
+                q.sol1 = factorBox([{top:`${p}×10²³ ${u_part}`, bot:"1"}, {top:`1 mol ${c.f}`, bot:`6.02×10²³ ${u_part}`, res:`${q.ans.toFixed(2)} mol`}]);
+                q.desc = `หารด้วย 6.02×10²³ เพื่อทำเป็นโมล`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>N (จำนวนอนุภาค) = ${p}×10²³`, 
+                    `n = N / (6.02×10²³) <br><small style='color:#cbd5e1'>(n = โมล)</small>`, 
+                    `n = (${p}×10²³) / (6.02×10²³)`, 
+                    `${q.ans.toFixed(2)} mol`
+                );
+                break;
+            case 'mol_atom_count':
+                q.ans = n * c.total; q.unit = "mol";
+                q.txt = `${c.f} จำนวน ${n} mol มีอะตอมองค์ประกอบรวมกี่โมล?`;
+                q.sol1 = factorBox([{top:`${n} mol ${c.f}`, bot:"1"}, {top:`${c.total} mol atom`, bot:`1 mol ${c.f}`, res:`${q.ans.toFixed(2)} mol`}]);
+                q.desc = `1 โมเลกุลมี ${c.total} อะตอม (นับเลขห้อยรวมกัน)`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>n (โมลสาร) = ${n} mol<br>Sub (เลขห้อยรวม) = ${c.total}`, 
+                    `n(อะตอม) = n(สาร) × เลขห้อยรวม`, 
+                    `n(อะตอม) = ${n} × ${c.total}`, 
+                    `${q.ans.toFixed(2)} mol`
+                );
+                break;
+            case 'mol_elem_stoich':
+                let elem = Object.keys(c.atom)[0]; let count = c.atom[elem];
+                q.ans = n * count; q.unit = "mol";
+                q.txt = `${c.f} จำนวน ${n} mol มีธาตุ ${elem} กี่โมล?`;
+                q.sol1 = factorBox([{top:`${n} mol ${c.f}`, bot:"1"}, {top:`${count} mol ${elem}`, bot:`1 mol ${c.f}`, res:`${q.ans.toFixed(2)} mol`}]);
+                q.desc = `ดูเลขห้อยของ ${elem} ในสูตร คือ ${count}`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>n (โมลสาร) = ${n} mol<br>Sub (เลขห้อย ${elem}) = ${count}`, 
+                    `n(${elem}) = n(สาร) × เลขห้อย`, 
+                    `n(${elem}) = ${n} × ${count}`, 
+                    `${q.ans.toFixed(2)} mol`
+                );
+                break;
+            case 'mw_calc':
+                let logic = []; let sum = 0;
+                let awMap = {H:1, C:12, O:16, N:14, S:32, Na:23, Cl:35.5, Ca:40, K:39, Mn:55, Fe:56, He:4, Ne:20};
+                let formulaStr = Object.entries(c.atom).map(([k,v]) => {
+                    let w = awMap[k]; logic.push(`(${v}×${w})`); sum += v*w; return `${k}=${w}`;
+                }).join(', ');
+                q.ans = sum; q.unit = "g/mol";
+                q.txt = `จงหามวลโมเลกุล (MW) ของ ${c.f} (กำหนด ${formulaStr})`;
+                q.sol1 = `<div style="text-align:center; font-size:1.1em;">${logic.join(' + ')}<br>= <b style="color:var(--primary)">${sum} g/mol</b></div>`;
+                q.desc = `นำมวลอะตอมคูณเลขห้อยแล้วบวกกัน`;
+                q.sol2 = `<div>ผลรวม: (เลขห้อย × มวลอะตอม)</div>`;
+                break;
+            case 'density_m_v':
+                let m_d = (n * 10).toFixed(1); q.ans = m_d / c.d; q.unit = "cm³";
+                q.txt = `${c.f}${showMW} (d = ${c.d} g/cm³) มวล ${m_d} g มีปริมาตรกี่ cm³?`;
+                q.sol1 = factorBox([{top:`${m_d} ${u_g} ${c.f}`, bot:"1"}, {top:`1 cm³`, bot:`${c.d} ${u_g} ${c.f}`, res:`${q.ans.toFixed(2)} cm³`}]);
+                q.desc = `ใช้ความหนาแน่นเป็นแฟกเตอร์เปลี่ยนหน่วย`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>m (มวล) = ${m_d} g<br>d (ความหนาแน่น) = ${c.d} g/cm³`, 
+                    `V = m / d <br><small style='color:#cbd5e1'>(V = ปริมาตร)</small>`, 
+                    `V = ${m_d} / ${c.d}`, 
+                    `${q.ans.toFixed(2)} cm³`
+                );
+                break;
+            case 'density_v_m':
+                let v_d = (n * 5).toFixed(1); q.ans = v_d * c.d; q.unit = "g";
+                q.txt = `${c.f}${showMW} (d = ${c.d} g/cm³) ปริมาตร ${v_d} cm³ มีมวลกี่กรัม?`;
+                q.sol1 = factorBox([{top:`${v_d} <span class="u-canc">cm³</span>`, bot:"1"}, {top:`${c.d} g ${c.f}`, bot:`1 <span class="u-canc">cm³</span>`, res:`${q.ans.toFixed(2)} g`}]);
+                q.desc = `เปลี่ยน cm³ เป็น g ด้วยค่า d`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>V (ปริมาตร) = ${v_d} cm³<br>d (ความหนาแน่น) = ${c.d} g/cm³`, 
+                    `m = V × d <br><small style='color:#cbd5e1'>(m = มวลสาร)</small>`, 
+                    `m = ${v_d} × ${c.d}`, 
+                    `${q.ans.toFixed(2)} g`
+                );
+                break;
+            case 'challenge_g_dm3':
+                let gMass = (n*c.mw).toFixed(1); q.ans = (gMass/c.mw)*22.4; q.unit = "dm³";
+                q.txt = `[BONUS] ${c.f}${showMW} มวล ${gMass} g มีปริมาตรกี่ dm³ STP?`;
+                q.sol1 = factorBox([{top:`${gMass} ${u_g} ${c.f}`, bot:"1"}, {top:`1 ${u_mol} ${c.f}`, bot:`${c.mw} ${u_g} ${c.f}`}, {top:`22.4 dm³`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} dm³`}]);
+                q.desc = `ขั้น 1: เปลี่ยน g เป็น mol (หาร MW)<br>ขั้น 2: เปลี่ยน mol เป็น dm³ (คูณ 22.4)`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>m=${gMass} g, MW=${c.mw}, STP=22.4`, 
+                    `Step 1: n = m/MW<br>Step 2: V = n × 22.4`, 
+                    `n = ${gMass}/${c.mw} = ${n} mol<br>V = ${n} × 22.4`, 
+                    `${q.ans.toFixed(2)} dm³`
+                );
+                break;
+            case 'challenge_part_g':
+                let pt = (n * 6.02).toFixed(2); q.ans = (pt/6.02)*c.mw; q.unit = "g";
+                q.txt = `[BONUS] ${c.f}${showMW} จำนวน ${pt}×10²³ ${uInfo.s} มีมวลกี่กรัม?`;
+                q.sol1 = factorBox([{top:`${pt}×10²³ ${u_part}`, bot:"1"}, {top:`1 ${u_mol} ${c.f}`, bot:`6.02×10²³ ${u_part}`}, {top:`${c.mw} g ${c.f}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} g`}]);
+                q.desc = `ขั้น 1: เปลี่ยนอนุภาคเป็น mol (หาร 6.02..)<br>ขั้น 2: เปลี่ยน mol เป็น g (คูณ MW)`;
+                q.sol2 = formulaBox(
+                    `<b>กำหนดตัวแปร:</b><br>N=${pt}×10²³, MW=${c.mw}`, 
+                    `Step 1: n = N/6.02×10²³<br>Step 2: m = n × MW`, 
+                    `n = ${pt}/6.02 = ${n} mol<br>m = ${n} × ${c.mw}`, 
+                    `${q.ans.toFixed(2)} g`
+                );
+                break;
+             default: 
+                q.ans = n; q.unit = "mol"; q.txt = "Error"; q.sol1="..."; q.sol2="...";
+        }
+        
+        g.q = q;
+        document.getElementById('q-topic').innerText = TopicNames[type] || type;
+        document.getElementById('q-main').innerHTML = q.txt;
+        document.getElementById('q-sub').innerText = "เลือกวิธีทำเพื่อดูเฉลย";
+        
+        document.getElementById('sol-content').innerHTML = `
+            <div style="margin-bottom:15px;">
+                <div style="background:var(--primary); color:white; padding:5px 10px; font-size:0.9em; font-weight:bold; border-radius:5px 5px 0 0;">
+                    วิธีที่ 1: Factor Label (ตัดหน่วย)
+                </div>
+                <div style="border:1px solid var(--primary); padding:15px 10px; border-radius:0 0 5px 5px; background:rgba(255,255,255,0.5);">
+                    ${q.sol1}
+                    <div style="margin-top:10px; font-size:0.9em; color:#475569; border-top:1px dashed #cbd5e1; padding-top:5px;">
+                        💡 ${q.desc || ''}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div style="background:var(--cyan); color:white; padding:5px 10px; font-size:0.9em; font-weight:bold; border-radius:5px 5px 0 0;">
+                    วิธีที่ 2: Formula (ใช้สูตร)
+                </div>
+                <div style="border:1px solid var(--cyan); padding:10px; border-radius:0 0 5px 5px; background:rgba(255,255,255,0.5);">
+                    ${q.sol2}
+                </div>
+            </div>
+        `;
+        
         document.getElementById('ans-in').value = '';
-        document.getElementById('q-box').classList.remove('bonus-mode');
-        g.isBonus = false;
-
-        // CHECK BONUS CHANCE (15%)
-        if (Math.random() < 0.15) {
-            g.isBonus = true;
-            document.getElementById('q-box').classList.add('bonus-mode');
-            sfx.play('bonus');
-            genBonusQuest();
-            return;
-        }
-        
-        const chem = DB[Math.floor(Math.random() * DB.length)];
-        const pName = chem.type === 'ion' ? 'หน่วยสูตร' : 'โมเลกุล'; 
-        
-        let mode = g.weaknessQueue.length > 0 ? g.weaknessQueue[0] : Math.floor(Math.random() * 7);
-        if (mode === 2 && !chem.d) mode = 0;
-        
-        let val = (Math.random() * 5 + 1).toFixed(1); 
-        if (val % 1 === 0) val = Math.floor(val); 
-
-        let qObj = { topic:"", q:"", rawAns:0, hint:"" };
-        let factSteps = [], formSteps = [];
-
-        // 0: Mass <-> Mol
-        if (mode === 0) {
-            let subMode = Math.random() > 0.5;
-            qObj.topic = "Mass ↔ Mole";
-            qObj.hint = "(ตอบเป็นทศนิยม)";
-            if(subMode) { // g -> mol
-                qObj.rawAns = val / chem.mw;
-                qObj.q = `สาร <b>${chem.f}</b> มวล <b>${val} g</b> มีกี่โมล? <br>(MW = ${chem.mw} g/mol)`;
-                
-                formSteps.push({t:"สูตร", c:`<span class="math-highlight">n = m / MW</span>`});
-                formSteps.push({t:"แทนค่า", c:`n = ${val} / ${chem.mw} = ${qObj.rawAns.toFixed(2)} mol`});
-
-                factSteps.push({t:"สิ่งที่โจทย์กำหนด", c:`เริ่มต้นจาก <b>${val} g</b>`});
-                factSteps.push({t:"Conversion Factor", c:`1 mol หนัก ${chem.mw} g`});
-                factSteps.push({t:"ตั้งสมการตัดหน่วย", c:`${val} <span class="cut-unit">g</span> × [ 1 mol / ${chem.mw} <span class="cut-unit">g</span> ]`});
-            } else { // mol -> g
-                qObj.rawAns = val * chem.mw;
-                qObj.q = `สาร <b>${chem.f}</b> จำนวน <b>${val} mol</b> มีมวลกี่กรัม? <br>(MW = ${chem.mw} g/mol)`;
-                
-                formSteps.push({t:"สูตร", c:`m = n × MW`});
-                formSteps.push({t:"แทนค่า", c:`m = ${val} × ${chem.mw} = ${qObj.rawAns.toFixed(2)} g`});
-
-                factSteps.push({t:"สิ่งที่โจทย์กำหนด", c:`เริ่มต้นจาก <b>${val} mol</b>`});
-                factSteps.push({t:"Conversion Factor", c:`1 mol หนัก ${chem.mw} g`});
-                factSteps.push({t:"ตั้งสมการตัดหน่วย", c:`${val} <span class="cut-unit">mol</span> × [ ${chem.mw} g / 1 <span class="cut-unit">mol</span> ]`});
-            }
-        }
-        // 1: Vol <-> Mol
-        else if (mode === 1) {
-            let subMode = Math.random() > 0.5;
-            qObj.topic = "Mole ↔ Volume (STP)";
-            qObj.hint = "(ตอบเป็นทศนิยม)";
-            if(subMode) { // mol -> L
-                qObj.rawAns = val * 22.4;
-                qObj.q = `แก๊ส <b>${chem.f}</b> จำนวน <b>${val} mol</b> มีปริมาตรกี่ลิตรที่ STP?`;
-                
-                formSteps.push({t:"สูตร", c:`V = n × 22.4`});
-                formSteps.push({t:"แทนค่า", c:`V = ${val} × 22.4 = ${qObj.rawAns.toFixed(2)} L`});
-
-                factSteps.push({t:"Factor", c:`1 mol = 22.4 L`});
-                factSteps.push({t:"ตั้งสมการ", c:`${val} <span class="cut-unit">mol</span> × [ 22.4 L / 1 <span class="cut-unit">mol</span> ]`});
-            } else { // L -> mol
-                qObj.rawAns = val / 22.4;
-                qObj.q = `แก๊ส <b>${chem.f}</b> ปริมาตร <b>${val} L</b> (STP) มีกี่โมล?`;
-                
-                formSteps.push({t:"สูตร", c:`n = V / 22.4`});
-                formSteps.push({t:"แทนค่า", c:`n = ${val} / 22.4 = ${qObj.rawAns.toFixed(2)} mol`});
-
-                factSteps.push({t:"Factor", c:`1 mol = 22.4 L`});
-                factSteps.push({t:"การคำนวณ", c:`${val} <span class="cut-unit">L</span> × [ 1 mol / 22.4 <span class="cut-unit">L</span> ]`});
-            }
-        }
-        // 2: Density
-        else if (mode === 2) {
-             qObj.topic = "Density (d = m/V)";
-             qObj.hint = "(ตอบเป็นทศนิยม)";
-             let subMode = Math.random() > 0.5;
-             if(subMode) { // V -> m
-                qObj.rawAns = chem.d * val;
-                qObj.q = `สาร <b>${chem.f}</b> ปริมาตร <b>${val} cm³</b> มีมวลกี่กรัม? <br>(d = ${chem.d} g/cm³)<br>`;
-                formSteps.push({t:"สูตร", c:`m = d × V`});
-                formSteps.push({t:"แทนค่า", c:`m = ${chem.d} × ${val} = ${qObj.rawAns.toFixed(2)} g`});
-                factSteps.push({t:"Factor", c:`ความหนาแน่นคือ <b>${chem.d} g / 1 cm³</b>`});
-                factSteps.push({t:"ตัดหน่วย", c:`${val} <span class="cut-unit">cm³</span> × [ ${chem.d} g / 1 <span class="cut-unit">cm³</span> ]`});
-             } else { // m -> V
-                qObj.rawAns = val / chem.d;
-                qObj.q = `สาร <b>${chem.f}</b> มวล <b>${val} g</b> มีปริมาตรกี่ cm³? <br>(d = ${chem.d} g/cm³)<br>`;
-                formSteps.push({t:"สูตร", c:`V = m / d`});
-                formSteps.push({t:"แทนค่า", c:`V = ${val} / ${chem.d} = ${qObj.rawAns.toFixed(2)} cm³`});
-                factSteps.push({t:"Factor", c:`d = ${chem.d} g/cm³ ➜ ใช้เป็น (1 cm³ / ${chem.d} g)`});
-                factSteps.push({t:"ตัดหน่วย", c:`${val} <span class="cut-unit">g</span> × [ 1 cm³ / ${chem.d} <span class="cut-unit">g</span> ]`});
-             }
-        }
-        // 3: Particle <-> Mol
-        else if (mode === 3) {
-            qObj.topic = "Particle ↔ Mole";
-            let subMode = Math.random() > 0.5;
-            if(subMode) {
-                 qObj.rawAns = val * 6.02;
-                 qObj.q = `สาร <b>${chem.f}</b> จำนวน <b>${val} mol</b> มีกี่${pName}?`;
-                 qObj.hint = "(ตอบเฉพาะตัวเลขข้างหน้า × 10²³)";
-                 
-                 formSteps.push({t:"สูตร", c:`<span class="math-highlight">N = n × 6.02×10²³</span>`});
-                 formSteps.push({t:"แทนค่า", c:`N = ${val} × 6.02... = ${qObj.rawAns.toFixed(2)} × 10²³`});
-
-                 factSteps.push({t:"Factor", c:`1 mol = 6.02×10²³ อนุภาค`});
-                 factSteps.push({t:"ตัดหน่วย", c:`${val} <span class="cut-unit">mol</span> × [ 6.02×10²³ / 1 <span class="cut-unit">mol</span> ]`});
-            } else {
-                 let m = Math.floor(Math.random() * 4 + 1) * 0.5;
-                 let pVal = (m * 6.02).toFixed(2);
-                 qObj.rawAns = m;
-                 qObj.q = `สาร <b>${chem.f}</b> จำนวน <b>${pVal} × 10²³</b> ${pName} คิดเป็นกี่โมล?`;
-                 qObj.hint = "(ตอบเป็นทศนิยมหรือจำนวนเต็ม)";
-
-                 formSteps.push({t:"สูตร", c:`<span class="math-highlight">n = N / 6.02×10²³</span>`});
-                 formSteps.push({t:"แทนค่า", c:`n = ${pVal} / 6.02`});
-
-                 factSteps.push({t:"Factor", c:`1 mol = 6.02×10²³ อนุภาค`});
-                 factSteps.push({t:"ตัดหน่วย", c:`${pVal}×10²³ <span class="cut-unit">อนุภาค</span> × [ 1 mol / 6.02×10²³ <span class="cut-unit">อนุภาค</span> ]`});
-            }
-        }
-        // 4 & 5: Atom Counting
-        else if (mode === 4 || mode === 5) {
-            let atoms = Object.keys(chem.atoms);
-            let t = atoms[Math.floor(Math.random() * atoms.length)];
-            let c = chem.atoms[t];
-            qObj.topic = mode === 4 ? "Molecule ➔ Atom (Mole)" : "Molecule ➔ Atom (Count)";
-            qObj.rawAns = val * c;
-
-            if(mode === 4) {
-                qObj.q = `สาร <b>${chem.f}</b> จำนวน <b>${val} mol</b> มีอะตอม <b>${t}</b> ทั้งหมดกี่ mol?`;
-                qObj.hint = "(ตอบเป็นจำนวนเต็มหรือทศนิยม)";
-            } else {
-                qObj.q = `สาร <b>${chem.f}</b> จำนวน <b>${val} × 10²³ ${pName}</b> มีอะตอม <b>${t}</b> ทั้งหมดเท่าไหร่?`;
-                qObj.hint = "(ตอบเฉพาะตัวเลขข้างหน้า × 10²³)";
-            }
-            
-            formSteps.push({t:"วิเคราะห์", c:`1 ${pName} ของ ${chem.f} มี <b>${t} อยู่ ${c} อะตอม</b>`});
-            formSteps.push({t:"คำนวณ", c:`${val} × ${c} = ${qObj.rawAns.toFixed(2)}`});
-
-            factSteps.push({t:"Factor", c:`(${c} atom ${t} / 1 ${pName} ${chem.f})`});
-            factSteps.push({t:"ตัดหน่วย", c:`${val} <span class="cut-unit">${pName}</span> × [ ${c} atom ${t} / 1 <span class="cut-unit">${pName}</span> ]`});
-        }
-        // 6: MW CALCULATION (Focus: Molar Mass)
-        else if (mode === 6) {
-            qObj.topic = "Molar Mass (g/mol)";
-            qObj.hint = "(คำนวณจากมวลอะตอมที่ให้)";
-            qObj.rawAns = chem.mw;
-            
-            let atomParts = Object.keys(chem.atoms).map(k => `${k}=${AM[k]}`).join(', ');
-            qObj.q = `จงหามวลต่อโมล (Molar Mass) ของ <b>${chem.f}</b> <br>กำหนดให้: ${atomParts}`;
-            
-            let calcStr = Object.keys(chem.atoms).map(k => `(${chem.atoms[k]}×${AM[k]})`).join(' + ');
-            
-            formSteps.push({t:"หลักการ", c:`Molar Mass = ผลรวมมวลอะตอมทั้งหมดในสูตร`});
-            formSteps.push({t:"กระจายสูตร", c:`${chem.f} ประกอบด้วย: ` + Object.keys(chem.atoms).map(k => `<br>- ${k}: ${chem.atoms[k]} ตัว (หนัก ${AM[k]})`).join('')});
-            formSteps.push({t:"คำนวณ", c:`MW = ${calcStr} = <b>${chem.mw}</b>`});
-
-            factSteps.push({t:"Concept", c:`มวลต่อโมลคือน้ำหนักของสาร 1 โมล ซึ่งเท่ากับมวลโมเลกุล`});
-            factSteps.push({t:"คำตอบ", c:`${chem.mw} g/mol`});
-        }
-
-        qObj.factSteps = factSteps;
-        qObj.formSteps = formSteps;
-        qObj.mode = mode;
-        finalizeQuest(qObj);
+        clearInterval(g.timer); g.tCur = g.tMax; updateTimeBar();
+        g.timer = setInterval(()=>{ g.tCur--; updateTimeBar(); if(g.tCur<=0) checkAns(true); },1000);
     }
 
-    function genBonusQuest() {
-        const chem = DB[Math.floor(Math.random() * DB.length)];
-        // Create 2-Step Problems
-        let types = ['g_to_L', 'L_to_g', 'g_to_N'];
-        let type = types[Math.floor(Math.random() * types.length)];
-        let qObj = { topic:"★ BONUS: 2-Step Calculation", q:"", rawAns:0, hint:"" };
-        let factSteps = [], formSteps = [];
+    function updateTimeBar() { document.getElementById('time-bar').style.width = (g.tCur/g.tMax)*100 + '%'; }
+    document.getElementById('ans-form').addEventListener('submit', (e)=>{ e.preventDefault(); checkAns(); });
 
-        if (type === 'g_to_L' && chem.atoms.O) { // Mass -> Vol (Gas)
-            // Use 0.5, 1, 2 moles equivalent
-            let n = Math.floor(Math.random()*2) + 0.5; 
-            let m = n * chem.mw;
-            qObj.rawAns = n * 22.4;
-            qObj.q = `แก๊ส <b>${chem.f}</b> มวล <b>${m} g</b> มีปริมาตรกี่ลิตรที่ STP? <br>(MW=${chem.mw})`;
-            qObj.hint = "Step 1: g ➜ mol, Step 2: mol ➜ L";
-            
-            formSteps.push({t:"Step 1: หาโมล", c:`n = m/MW = ${m}/${chem.mw} = ${n} mol`});
-            formSteps.push({t:"Step 2: หาปริมาตร", c:`V = n × 22.4 = ${n} × 22.4 = ${qObj.rawAns} L`});
-            
-            factSteps.push({t:"Plan", c:`g ➜ mol ➜ L`});
-            factSteps.push({t:"สมการต่อเนื่อง", c:`${m} <span class="cut-unit">g</span> × [1 <span class="cut-unit">mol</span>/${chem.mw} <span class="cut-unit">g</span>] × [22.4 L/1 <span class="cut-unit">mol</span>]`});
-        }
-        else if (type === 'L_to_g' && chem.atoms.O) { // Vol -> Mass
-            let n = Math.floor(Math.random()*2) + 1;
-            let v = n * 22.4;
-            qObj.rawAns = n * chem.mw;
-            qObj.q = `แก๊ส <b>${chem.f}</b> ปริมาตร <b>${v} L</b> (STP) มีมวลกี่กรัม? <br>(MW=${chem.mw})`;
-            qObj.hint = "Step 1: L ➜ mol, Step 2: mol ➜ g";
-
-            formSteps.push({t:"Step 1: หาโมล", c:`n = V/22.4 = ${v}/22.4 = ${n} mol`});
-            formSteps.push({t:"Step 2: หามวล", c:`m = n × MW = ${n} × ${chem.mw} = ${qObj.rawAns} g`});
-
-            factSteps.push({t:"Plan", c:`L ➜ mol ➜ g`});
-            factSteps.push({t:"สมการต่อเนื่อง", c:`${v} <span class="cut-unit">L</span> × [1 <span class="cut-unit">mol</span>/22.4 <span class="cut-unit">L</span>] × [${chem.mw} g/1 <span class="cut-unit">mol</span>]`});
-        }
-        else { // g -> N (Particles)
-            let n = 0.5;
-            let m = n * chem.mw;
-            qObj.rawAns = 3.01;
-            qObj.q = `สาร <b>${chem.f}</b> มวล <b>${m} g</b> มีกี่โมเลกุล? <br>(MW=${chem.mw})`;
-            qObj.hint = "(ตอบเฉพาะตัวเลขข้างหน้า × 10²³)";
-
-            formSteps.push({t:"Step 1: หาโมล", c:`n = ${m}/${chem.mw} = 0.5 mol`});
-            formSteps.push({t:"Step 2: หาอนุภาค", c:`N = 0.5 × 6.02 = 3.01 × 10²³`});
-
-            factSteps.push({t:"Plan", c:`g ➜ mol ➜ molecule`});
-            factSteps.push({t:"สมการต่อเนื่อง", c:`${m} <span class="cut-unit">g</span> × [1 <span class="cut-unit">mol</span>/${chem.mw} <span class="cut-unit">g</span>] × [6.02×10²³ / 1 <span class="cut-unit">mol</span>]`});
-        }
-
-        qObj.factSteps = factSteps;
-        qObj.formSteps = formSteps;
-        finalizeQuest(qObj);
-    }
-
-    function finalizeQuest(qObj) {
-        g.qData = qObj;
-        g.ans = parseFloat(qObj.rawAns.toFixed(2));
-        
-        const qBox = document.getElementById('q-box');
-        if(qBox) {
-            let badge = g.isBonus ? `<div class="bonus-badge">★ BONUS x2 ★</div>` : '';
-            qBox.innerHTML = `
-                ${badge}
-                <div class="topic-tag">${qObj.topic}</div>
-                <div style="font-size:1.2em; padding-top:10px;">${qObj.q}</div>
-                <div class="format-hint">${qObj.hint}</div>
-            `;
-        }
-    }
-
-    // --- CHECK & RENDER STEPS ---
-    function checkAns(forceFail=false) {
+    function checkAns(timeout=false) {
         clearInterval(g.timer);
-        let u = parseFloat(document.getElementById('ans-in').value);
-        g.isCorrect = false;
+        let uVal = parseFloat(document.getElementById('ans-in').value);
+        let isCor = !timeout && Math.abs(uVal - g.q.ans) <= (g.q.ans*0.05 + 0.1); 
         
-        if(!forceFail && !isNaN(u)) {
-            if(Math.abs(u - g.ans) <= 0.1 || Math.abs((u-g.ans)/g.ans) < 0.05) g.isCorrect = true;
-        }
-
-        const feed = document.getElementById('feed-box');
-        const btn = document.getElementById('btn-action');
-        const title = document.getElementById('res-title');
+        document.getElementById('tut-ans').innerText = `${g.q.ans.toFixed(2)} ${g.q.unit}`;
         
-        if(g.isCorrect) {
-            sfx.play('correct');
-            title.innerHTML = "<span style='color:#27ae60'>✅ ถูกต้อง!</span>";
-            feed.style.display = "none";
-            btn.innerText = "🎁 เลือกของรางวัล";
-            btn.style.background = "var(--gold)";
-            btn.onclick = goToReward;
+        if(isCor) {
+            playSfx('atk');
             
-            if(g.weaknessQueue.length > 0 && g.weaknessQueue[0] === g.qData.mode) {
-                 g.weaknessQueue.shift(); 
-                 alert("เยี่ยมมาก! คุณเอาชนะจุดอ่อนเรื่องนี้ได้แล้ว 🎉");
-            }
+            // ANIMATION: Hero Attacks!
+            document.getElementById('hero-img').classList.add('anim-atk-hero');
+            document.getElementById('enemy-img').classList.add('anim-shake');
+            setTimeout(() => {
+                document.getElementById('hero-img').classList.remove('anim-atk-hero');
+                document.getElementById('enemy-img').classList.remove('anim-shake');
+            }, 400);
+
+            // Random Positive Feedback
+            let praise = PositivePhrases[Math.floor(Math.random() * PositivePhrases.length)];
+            document.getElementById('res-title').innerHTML = `<span style='color:#10b981'>✅ ${praise}</span>`;
+            
+            document.getElementById('res-reward').style.display = 'block';
+            document.getElementById('res-reward').innerText = "เลือกหีบรางวัลเลย!";
+            document.getElementById('res-btn').innerText = "ไปเลือกรางวัล";
+            document.getElementById('res-btn').onclick = () => {
+                showScreen('scr-chest');
+                document.getElementById('chest-result').innerHTML = "";
+                document.getElementById('chest-next-btn').style.display = 'none';
+                document.querySelectorAll('.chest-item').forEach(e=>{ e.style.pointerEvents='auto'; e.style.opacity='1'; e.innerText='📦'; });
+            };
         } else {
-            sfx.play('wrong');
-            title.innerHTML = "<span style='color:#c0392b'>❌ ผิดพลาด</span>";
-            g.hp -= 20;
-            feed.innerHTML = `คำตอบที่ถูกคือ ~ ${g.ans}`;
-            feed.style.display = "block";
-            btn.innerText = "➡️ ข้อต่อไป";
-            btn.style.background = "#95a5a6";
-            btn.onclick = nextQuest;
+            playSfx('wrong');
+            
+            // ANIMATION: Enemy Attacks!
+            document.getElementById('enemy-img').classList.add('anim-atk-enemy');
+            document.getElementById('app').classList.add('anim-dmg');
+            setTimeout(() => {
+                document.getElementById('enemy-img').classList.remove('anim-atk-enemy');
+                document.getElementById('app').classList.remove('anim-dmg');
+            }, 400);
 
-            if(!g.isBonus && g.qData.mode !== undefined && !g.weaknessQueue.includes(g.qData.mode)) {
-                g.weaknessQueue.push(g.qData.mode);
-            }
+            g.hp = Math.max(0, g.hp - 10);
+            updateHUD();
+            document.getElementById('res-title').innerHTML = "<span style='color:#ef4444'>❌ ผิดจ้า สู้ใหม่นะ!</span>";
+            document.getElementById('res-reward').style.display = 'none';
+            document.getElementById('res-btn').innerText = "ไปต่อ";
+            document.getElementById('res-btn').onclick = () => { 
+                if(g.hp<=0) resetGame(); else { nextQuest(); showScreen('scr-game'); }
+            };
         }
-
-        renderSteps('sol-factor', g.qData.factSteps || []);
-        renderSteps('sol-formula', g.qData.formSteps || []);
-
-        switchTab('factor');
-        document.getElementById('scr-tutor').style.display = 'flex';
-        updateUI();
+        showScreen('scr-result');
     }
 
-    function renderSteps(id, steps) {
-        let html = '';
-        if(steps && steps.length > 0) {
-            steps.forEach((s) => {
-                html += `<div class="step-box">
-                            <div class="step-title">${s.t}</div>
-                            <div class="step-content">${s.c}</div>
-                        </div>`;
-            });
+    function selectChest(i) {
+        document.querySelectorAll('.chest-item').forEach(e=>e.style.pointerEvents='none');
+        document.querySelectorAll('.chest-item').forEach((e,idx)=>{ if(idx!==i-1) e.style.opacity='0.3'; });
+        
+        let rng = Math.random();
+        let xp = g.isBonus ? 40 : 20;
+        let msg = "", col = "";
+        
+        if(rng < 0.2) {
+            g.isPoisoned = true; g.hp-=5; msg="☠️ กับดักพิษ! (HP-1/Turn)"; col="var(--poison)"; playSfx('wrong');
+        } else if(rng < 0.4) {
+            g.hp = Math.min(g.hp+30, g.maxHp); msg="💖 ได้ยาฟื้นเลือด (+30 HP)"; col="#ef4444"; playSfx('win');
+        } else if(rng < 0.6) {
+            g.mp = Math.min(g.mp+20, g.maxMp); msg="💧 ได้ยามานา (+20 MP)"; col="var(--primary)"; playSfx('win');
         } else {
-             html = `<div style="text-align:center; padding:20px; color:#95a5a6;">ไม่มีข้อมูลเฉลยละเอียดสำหรับข้อนี้</div>`;
-        }
-        document.getElementById(id).innerHTML = html;
-    }
-
-    // --- SYSTEM FUNCTIONS ---
-    function goToReward() {
-        sfx.play('skill');
-        document.getElementById('scr-tutor').style.display = 'none';
-        document.getElementById('scr-reward').style.display = 'flex';
-    }
-
-    function claimReward(type) {
-        if(Math.random() < 0.2) {
-            if(g.cls === 'Dendro') {
-                sfx.play('skill'); alert("🌿 Dendro Passive: พลังธรรมชาติป้องกันคำสาป!");
-            } else {
-                sfx.play('wrong');
-                let dmg = 30; g.hp -= dmg;
-                alert(`😱 คุณโดนคำสาป! เสียเลือด ${dmg} HP`);
-                document.getElementById('scr-reward').style.display = 'none';
-                if(g.hp <= 0) { alert("Game Over"); resetGame(); return; }
-                checkLevelUp(); return;
-            }
+            g.xp += xp; msg=`✨ ได้รับ EXP (+${xp})`; col="var(--gold)"; playSfx('win');
         }
         
-        sfx.play('level');
-        let gain = g.isBonus ? 50 : 25; // x2 BONUS
-        
-        if(type === 'xp') { g.xp += gain; alert(`ได้รับ ${gain} EXP!`); } 
-        else if (type === 'mp') { g.mp = g.maxM; alert("ฟื้นฟู MP เต็มหลอด!"); }
-        else if (type === 'cost') { g.skillCostMod = Math.max(0.5, g.skillCostMod - 0.1); alert("ลดการใช้ MP ของสกิลลง!"); }
-        
-        document.getElementById('scr-reward').style.display = 'none';
-        checkLevelUp();
+        checkLevelUp(); updateHUD();
+        document.getElementById('chest-result').innerHTML = `<span style="color:${col}">${msg}</span>`;
+        document.getElementById('chest-next-btn').style.display = 'block';
+    }
+    
+    function finishChest() {
+        if(g.examScore >= g.targetScore) { playSfx('win'); showScreen('scr-win'); }
+        else { nextQuest(); showScreen('scr-game'); }
     }
 
     function checkLevelUp() {
-        if(g.xp >= 100) {
-            g.lv++; g.xp = 0; g.maxH += 20; g.hp = g.maxH;
-            document.getElementById('u-icon').innerHTML = g.icon + `<div class="lv-badge">Lv.${g.lv}</div>`;
-            alert(`🎉 Level Up! ตอนนี้เลเวล ${g.lv}`);
-        }
-        if(g.lv + g.midScore >= 14) {
-            sfx.play('level');
-            document.getElementById('win-total').innerText = (g.midScore + g.lv);
-            document.getElementById('scr-win').style.display = 'flex';
-        } else { nextQuest(); }
+        if(g.xp >= g.maxXp) { g.xp-=g.maxXp; g.lv++; g.examScore++; g.maxXp+=5; g.hp=g.maxHp; playSfx('win'); }
     }
 
+    function resetGame() { showScreen('scr-landing'); }
     function nextQuest() {
-        document.getElementById('scr-tutor').style.display='none';
-        if(g.hp <= 0) { alert("Game Over"); resetGame(); } else genQuest();
+        if(g.isPoisoned) { g.hp--; if(g.hp<=0) resetGame(); }
+        updateHUD(); genQuest();
+    }
+    
+    function updateHUD() {
+        document.getElementById('hp-bar').style.width = (g.hp/g.maxHp)*100 + '%';
+        document.getElementById('mp-bar').style.width = (g.mp/g.maxMp)*100 + '%';
+        document.getElementById('xp-bar').style.width = (g.xp/g.maxXp)*100 + '%';
+        document.getElementById('lv-txt').innerText = "Lv."+g.lv;
+        document.getElementById('score-txt').innerText = g.examScore + " คะแนน";
+        document.getElementById('poison-mark').style.display = g.isPoisoned ? 'flex' : 'none';
     }
 
-    function switchTab(t) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.sol-panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('btn-'+t).classList.add('active');
-        document.getElementById('sol-'+t).classList.add('active');
+    // Calc Logic
+    function toggleCalc() { 
+        let c = document.getElementById('calc'); let game = document.getElementById('scr-game');
+        if(c.style.display==='flex'){ c.style.display='none'; game.classList.remove('calc-mode'); }
+        else{ c.style.display='flex'; game.classList.add('calc-mode'); }
     }
+    function cIn(v){ document.getElementById('c-disp').value+=v; }
+    function cClr(){ document.getElementById('c-disp').value=''; }
+    function cDel(){ let d=document.getElementById('c-disp'); d.value=d.value.slice(0,-1); }
+    function cEval(){ try{ let v=eval(document.getElementById('c-disp').value); document.getElementById('c-disp').value=parseFloat(v).toFixed(2); document.getElementById('ans-in').value=parseFloat(v).toFixed(2); }catch{document.getElementById('c-disp').value='Err';} }
 
-    function startTimer() {
-        g.timer = setInterval(() => {
-            g.tLeft--; updateUI();
-            if(g.tLeft<=0) { clearInterval(g.timer); checkAns(true); }
-        }, 1000);
-    }
-
-    function useSkill(k, base) {
-        let cost = Math.floor(base * g.skillCostMod);
-        if(g.mp < cost) return alert("MP ไม่พอ!");
-        sfx.play('skill'); g.mp -= cost;
-        if(k==='heal') g.hp = Math.min(g.maxH, g.hp+40);
-        if(k==='time') g.tLeft += 20;
-        if(k==='skip') genQuest();
-        if(k==='hint') alert("Hint: เขียนหน่วยที่โจทย์ให้ และหน่วยที่โจทย์ถาม");
-        updateUI();
-    }
-
-    function updateUI() {
-        if(document.getElementById('hp-bar')) document.getElementById('hp-bar').style.width = Math.max(0, g.hp/g.maxH*100)+'%';
-        if(document.getElementById('mp-bar')) document.getElementById('mp-bar').style.width = (g.mp/g.maxM*100)+'%';
-        if(document.getElementById('xp-bar')) document.getElementById('xp-bar').style.width = g.xp+'%';
-        if(document.getElementById('t-bar')) document.getElementById('t-bar').style.width = (g.tLeft/g.tMax*100)+'%';
-        
-        if(document.getElementById('hp-txt')) document.getElementById('hp-txt').innerText = `${Math.floor(g.hp)}/${g.maxH}`;
-        if(document.getElementById('mp-txt')) document.getElementById('mp-txt').innerText = `${g.mp}`;
-        if(document.getElementById('t-txt')) document.getElementById('t-txt').innerText = `${g.tLeft}s`;
+    // Skills
+    function useSkill(t) {
+        if(t==='heal') {
+            if(g.mp < 20) return alert('MP ไม่พอ (ต้องการ 20)');
+            g.mp-=20; g.hp=Math.min(g.hp+50,g.maxHp); g.isPoisoned=false; 
+            updateHUD();
+            document.getElementById('hero-img').classList.add('anim-shake');
+            setTimeout(()=>document.getElementById('hero-img').classList.remove('anim-shake'), 400);
+            playSfx('win');
+        }
+        else if(t==='time') {
+            if(g.mp < 15) return alert('MP ไม่พอ (ต้องการ 15)');
+            g.mp-=15; g.tCur = Math.min(g.tCur+30, g.tMax); 
+            updateHUD(); updateTimeBar();
+            playSfx('win');
+        }
+        else if(t==='skip') {
+            if(g.mp < 30) return alert('MP ไม่พอ (ต้องการ 30)');
+            g.mp-=30; nextQuest();
+        }
+        else if(t==='hint') { 
+            if(g.mp < 10) return alert('MP ไม่พอ (ต้องการ 10)');
+            g.mp-=10; 
+            let hint = "";
+            if(g.q.txt.includes('STP')) hint = "STP ใช้เลข 22.4";
+            else if(g.q.txt.includes('MW') || g.q.txt.includes('มวล')) hint = "เปลี่ยนโมลเป็นกรัม ใช้ MW คูณ";
+            else if(g.q.txt.includes('×10²³')) hint = "เปลี่ยนโมลเป็นอนุภาค คูณ 6.02×10²³";
+            else if(g.q.txt.includes('d =')) hint = "ความหนาแน่น d = มวล(g) / ปริมาตร(cm³)";
+            else hint = "ตัดหน่วยให้เหลือสิ่งที่ต้องการ";
+            
+            document.getElementById('q-hint-box').innerHTML = hint; 
+            document.getElementById('q-hint-box').style.display='block'; updateHUD(); 
+        }
     }
 </script>
 </body>
