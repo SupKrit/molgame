@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mol Impact: V.90 Final Fun</title>
+    <title>Mol Impact: Exam Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&family=Kanit:wght@400;600;800;900&display=swap'); 
         :root {
@@ -15,6 +15,7 @@
             --glass: rgba(30, 41, 59, 0.85);
             --glass-border: rgba(255, 255, 255, 0.15);
             --poison: #a855f7;
+            --curse: #581c87;
         }
         body { 
             font-family: 'Sarabun', sans-serif; 
@@ -29,6 +30,7 @@
             box-shadow: 0 0 50px rgba(0,0,0,0.8);
             transition: 0.3s;
         }
+
         /* --- UI COMPONENTS --- */
         .screen { 
             position: absolute; inset: 0; z-index: 10; 
@@ -150,14 +152,50 @@
             cursor: pointer; box-shadow: 0 4px 0 #b45309; flex-shrink: 0;
         }
         .ios-calc-btn:active { transform: translateY(2px); box-shadow: none; }
+        
+        /* IMPROVED CALCULATOR STYLE */
         .calc-overlay {
-            position: absolute; bottom: 0; width: 100%; height: 50%;
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 65%; /* เพิ่มความสูงเพื่อให้มีที่วางโจทย์ */
             background: #1e293b; border-radius: 24px 24px 0 0; z-index: 100;
-            display: none; flex-direction: column; padding: 15px; box-sizing: border-box;
+            display: none; flex-direction: column; 
+            padding: 15px;
+            box-sizing: border-box;
             border-top: 2px solid var(--cyan); animation: slideUp 0.3s;
+            box-shadow: 0 -10px 50px rgba(0,0,0,0.9);
         }
+        
+        .calc-q-box {
+            background: rgba(15,23,42,0.6); border: 1px solid var(--cyan);
+            padding: 10px; border-radius: 12px; margin-bottom: 10px;
+            font-size: 0.9em; color: #cbd5e1;
+            max-height: 60px; overflow-y: auto; flex-shrink: 0;
+        }
+
+        .calc-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); 
+            gap: 10px;
+            flex: 1;
+            max-width: 400px; margin: 0 auto; width: 100%;
+        }
+        .c-btn {
+            background: #334155; color: white; border: none; border-radius: 12px;
+            font-size: 1.4em; font-family: 'Kanit'; font-weight: 600;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3); transition: 0.1s;
+        }
+        .c-btn:active { transform: translateY(3px); box-shadow: none; }
+        .c-op { background: var(--gold); color: black; font-size: 1.6em; }
+        
+        /* ป้องกันตัวเลขตกขอบ */
+        #c-disp {
+            width: 100%; box-sizing: border-box;
+            background: rgba(0,0,0,0.3); border-radius: 8px;
+            padding: 5px 10px;
+            white-space: nowrap; overflow: hidden;
+        }
+        
         @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-        .calc-op { font-size: 1.6em !important; font-weight: bold; }
 
         /* Sol Box */
         .sol-box {
@@ -186,13 +224,28 @@
         /* Animations */
         @keyframes atk-r { 0%{transform:translateX(0) scaleX(-1)} 50%{transform:translateX(80px) scaleX(-1)} 100%{transform:translateX(0) scaleX(-1)} }
         @keyframes atk-l { 0%{transform:translateX(0)} 50%{transform:translateX(-80px)} 100%{transform:translateX(0)} }
-        @keyframes shake { 0%{transform:translate(0,0)} 25%{transform:translate(-5px,5px)} 50%{transform:translate(5px,-5px)} 75%{transform:translate(-5px,-5px)} 100%{transform:translate(0,0)} }
-        @keyframes flash-red { 0%{box-shadow: inset 0 0 0 red;} 50%{box-shadow: inset 0 0 50px red;} 100%{box-shadow: inset 0 0 0 red;} }
+        
+        @keyframes shake-screen { 
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        @keyframes flash-red { 0%{box-shadow: inset 0 0 0 red;} 50%{box-shadow: inset 0 0 100px red;} 100%{box-shadow: inset 0 0 0 red;} }
+        @keyframes flash-green { 0%{box-shadow: inset 0 0 0 #10b981;} 50%{box-shadow: inset 0 0 50px #10b981;} 100%{box-shadow: inset 0 0 0 #10b981;} }
         
         .anim-atk-hero { animation: atk-r 0.3s ease-in-out; }
         .anim-atk-enemy { animation: atk-l 0.3s ease-in-out; }
-        .anim-shake { animation: shake 0.4s; }
-        .anim-dmg { animation: flash-red 0.4s; }
+        .anim-shake-screen { animation: shake-screen 0.5s; }
+        .anim-dmg { animation: flash-red 0.5s; }
+        .anim-correct { animation: flash-green 0.5s; }
 
         .calc-mode .stage { flex: 0; height: 100px; min-height: 100px; overflow: hidden; } 
         .calc-mode .skill-grid { display: none; }
@@ -203,10 +256,14 @@
     <div id="scr-landing" class="screen active" style="align-items:center; justify-content:center;">
         <div style="text-align:center; animation: fadeIn 1s;">
             <div style="font-size:3.5em; font-family:'Kanit'; font-weight:900; line-height:1; color:white; text-shadow:0 0 40px var(--primary);">MOL<br><span style="color:var(--primary)">IMPACT</span></div>
-            <div style="color:var(--cyan); letter-spacing:5px; font-size:0.8em; margin-top:10px; font-weight:600;">V.90 FINAL FUN</div>
+            <div style="color:var(--cyan); letter-spacing:5px; font-size:0.8em; margin-top:10px; font-weight:600;">EXAM EDITION</div>
         </div>
         <div style="width:80%; max-width:320px; margin-top:40px;">
             <input type="text" id="p-name" class="input-box" placeholder="ชื่อเล่น (Nickname)" maxlength="10">
+            <div style="margin-top:15px; background:rgba(251, 191, 36, 0.15); padding:10px; border-radius:10px; border:1px dashed var(--gold); text-align:center;">
+                <b style="color:var(--gold);">🏆 ภารกิจสอบแก้</b><br>
+                <span style="font-size:0.85em; color:#cbd5e1;">ต้องทำคะแนนรวมให้ได้ <b>14 คะแนน</b> ขึ้นไป<br>(คะแนนเก็บ + คะแนนในเกม) ถึงจะผ่าน!</span>
+            </div>
             <button class="btn" onclick="checkName()" style="margin-top:15px;">🚀 เริ่มเกม</button>
             <button class="btn" style="margin-top:10px; background:transparent; border:1px solid #475569;" onclick="showScreen('scr-howto')">📜 วิธีเล่น</button>
         </div>
@@ -217,22 +274,19 @@
         <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:16px; font-size:0.95em; line-height:1.7;">
             <div style="margin-bottom:15px;">
                 <b style="color:var(--cyan); font-size:1.1em;">1. ภารกิจของคุณ</b><br>
-                ตอบโจทย์เคมีให้ถูกต้องเพื่อโจมตีมอนสเตอร์! ถ้าตอบผิด... คุณจะโดนโจมตีสวนกลับ!
+                ตอบโจทย์เคมีให้ถูกต้องเพื่อเก็บ XP และคะแนน!
             </div>
             <div style="margin-bottom:15px;">
-                <b style="color:var(--accent); font-size:1.1em;">2. รางวัลแห่งชัยชนะ</b><br>
-                เมื่อตอบถูก คุณจะได้เลือก <b>"หีบสมบัติปริศนา"</b> ซึ่งข้างในอาจมี XP, MP, หรือยาเพิ่มเลือด ...แต่ระวัง! บางกล่องมี <span style="color:var(--poison)">กับดักพิษ</span> ซ่อนอยู่
+                <b style="color:var(--accent); font-size:1.1em;">2. การต่อสู้</b><br>
+                ตอบถูก: โจมตี + เลือกรางวัล<br>
+                ตอบผิด: โดนโจมตีสวนกลับ!
             </div>
             <div style="margin-bottom:15px;">
-                <b style="color:var(--gold); font-size:1.1em;">3. ตัวช่วยพิเศษ</b><br>
+                <b style="color:var(--poison); font-size:1.1em;">3. ระวังกับดัก!</b><br>
                 <ul>
-                    <li><b>Heal:</b> ฟื้นเลือด + แก้พิษ</li>
-                    <li><b>Time:</b> เพิ่มเวลาคิด</li>
-                    <li><b>Hint:</b> บอกใบ้สูตรเด็ด</li>
+                    <li><b>พิษ (Poison):</b> เลือดลด 2 หน่วยทุกตา</li>
+                    <li><b>คำสาป (Curse):</b> เลือดลดทันที 10 หน่วย!</li>
                 </ul>
-            </div>
-            <div>
-                <b style="color:#10b981;">💡 เคล็ดลับ:</b> พยายามเก็บ XP เพื่อ Level Up แล้วเลือดจะเต็มหลอดทันที!
             </div>
         </div>
         <button class="btn btn-cyan" style="margin-top:20px;" onclick="showScreen('scr-landing')">กลับไปหน้าแรก</button>
@@ -310,8 +364,8 @@
                 <div id="bonus-badge" class="bonus-tag" style="display:none;">🔥 BONUS</div>
                 <div style="font-size:0.9em; color:var(--primary); font-weight:bold; font-family:'Kanit';" id="q-topic">TOPIC</div>
                 <div id="q-main" style="font-size:1.1em; font-weight:bold; margin:8px 0;">...</div>
-                <div id="q-sub" style="color:#94a3b8; font-size:0.9em;">...</div>
-                <div id="q-hint-box" style="display:none; margin-top:5px; padding:5px; background:rgba(251,191,36,0.1); border-radius:8px; color:var(--gold); font-size:0.9em;"></div>
+                <div id="q-sub" style="color:#94a3b8; font-size:0.9em; display:none;"></div>
+                <div id="q-hint-box" style="display:none; margin-top:5px; padding:8px; background:rgba(251,191,36,0.1); border-radius:8px; color:var(--gold); font-size:1em; font-weight:bold; border:1px dashed var(--gold);"></div>
             </div>
             <form id="ans-form" style="display:flex; gap:10px;">
                 <div class="ios-calc-btn" onclick="toggleCalc()">
@@ -358,28 +412,33 @@
     </div>
 
     <div id="calc" class="calc-overlay">
-        <input id="c-disp" type="text" readonly style="width:100%; background:transparent; border:none; text-align:right; font-size:2.5em; color:white; margin-bottom:10px; font-family:'Kanit';" placeholder="0">
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; flex:1;">
-            <button onclick="cClr()" style="background:var(--accent); color:white; border:none; border-radius:8px;">C</button>
-            <button onclick="cDel()" style="background:#475569; color:white; border:none; border-radius:8px;">←</button>
-            <button onclick="cIn('/')" class="calc-op" style="background:var(--gold); color:black; border:none; border-radius:8px;">÷</button>
-            <button onclick="cIn('*')" class="calc-op" style="background:var(--gold); color:black; border:none; border-radius:8px;">×</button>
-            <button onclick="cIn('7')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">7</button>
-            <button onclick="cIn('8')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">8</button>
-            <button onclick="cIn('9')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">9</button>
-            <button onclick="cIn('-')" class="calc-op" style="background:var(--gold); color:black; border:none; border-radius:8px;">-</button>
-            <button onclick="cIn('4')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">4</button>
-            <button onclick="cIn('5')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">5</button>
-            <button onclick="cIn('6')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">6</button>
-            <button onclick="cIn('+')" class="calc-op" style="background:var(--gold); color:black; border:none; border-radius:8px;">+</button>
-            <button onclick="cIn('1')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">1</button>
-            <button onclick="cIn('2')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">2</button>
-            <button onclick="cIn('3')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">3</button>
-            <button onclick="cEval()" style="grid-row:span 2; background:var(--primary); color:white; border:none; border-radius:8px; font-size:1.5em;">=</button>
-            <button onclick="cIn('0')" style="grid-column:span 2; background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">0</button>
-            <button onclick="cIn('.')" style="background:#334155; color:white; border:none; border-radius:8px; font-size:1.2em;">.</button>
+        <div class="calc-q-box" id="calc-q-display">
+            โจทย์: ...
         </div>
-        <div style="text-align:center; color:#94a3b8; margin-top:5px; cursor:pointer;" onclick="toggleCalc()">🔻 ปิด</div>
+        
+        <input id="c-disp" type="text" readonly style="font-size:2.5em; text-align:right; font-family:'Kanit'; color:white; border:none; margin-bottom:10px;" placeholder="0">
+        
+        <div class="calc-grid">
+            <button onclick="cClr()" class="c-btn" style="background:var(--accent);">C</button>
+            <button onclick="cDel()" class="c-btn" style="background:#475569;">←</button>
+            <button onclick="cIn('/')" class="c-btn c-op">÷</button>
+            <button onclick="cIn('*')" class="c-btn c-op">×</button>
+            <button onclick="cIn('7')" class="c-btn">7</button>
+            <button onclick="cIn('8')" class="c-btn">8</button>
+            <button onclick="cIn('9')" class="c-btn">9</button>
+            <button onclick="cIn('-')" class="c-btn c-op">-</button>
+            <button onclick="cIn('4')" class="c-btn">4</button>
+            <button onclick="cIn('5')" class="c-btn">5</button>
+            <button onclick="cIn('6')" class="c-btn">6</button>
+            <button onclick="cIn('+')" class="c-btn c-op">+</button>
+            <button onclick="cIn('1')" class="c-btn">1</button>
+            <button onclick="cIn('2')" class="c-btn">2</button>
+            <button onclick="cIn('3')" class="c-btn">3</button>
+            <button onclick="cEval()" class="c-btn" style="grid-row:span 2; background:var(--primary); font-size:2em;">=</button>
+            <button onclick="cIn('0')" class="c-btn" style="grid-column:span 2;">0</button>
+            <button onclick="cIn('.')" class="c-btn">.</button>
+        </div>
+        <div style="text-align:center; color:#94a3b8; margin-top:10px; cursor:pointer; padding:5px;" onclick="toggleCalc()">🔻 ปิดเครื่องคิดเลข</div>
     </div>
 </div>
 
@@ -387,7 +446,6 @@
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     const ctx = new AudioCtx();
     
-    // --- UPDATED SOUND LOGIC ---
     function playSfx(type) {
         if(ctx.state === 'suspended') ctx.resume();
         const osc = ctx.createOscillator(); const gain = ctx.createGain();
@@ -395,35 +453,24 @@
         const now = ctx.currentTime;
         
         if(type==='atk'){ 
-            // Sharp High Pitch (Success)
-            osc.frequency.setValueAtTime(400,now); 
-            osc.frequency.exponentialRampToValueAtTime(800,now+0.1); 
-            gain.gain.setValueAtTime(0.1,now); 
-            gain.gain.linearRampToValueAtTime(0,now+0.1); 
-            osc.start(now); osc.stop(now+0.1); 
-        }
-        else if(type==='wrong'){
-            // Low Discordant Pitch (Failure)
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(150,now); 
-            osc.frequency.linearRampToValueAtTime(100,now+0.3); 
-            gain.gain.setValueAtTime(0.2,now); 
-            gain.gain.linearRampToValueAtTime(0,now+0.3); 
+            osc.frequency.setValueAtTime(800,now); osc.frequency.exponentialRampToValueAtTime(1200,now+0.1); 
+            gain.gain.setValueAtTime(0.3,now); gain.gain.linearRampToValueAtTime(0,now+0.3); 
             osc.start(now); osc.stop(now+0.3); 
         }
+        else if(type==='wrong'){
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150,now); osc.frequency.linearRampToValueAtTime(80,now+0.4); 
+            gain.gain.setValueAtTime(0.5,now); gain.gain.linearRampToValueAtTime(0,now+0.4); 
+            osc.start(now); osc.stop(now+0.4); 
+        }
         else if(type==='win'){ 
-            // Victory Melody
-            osc.type='triangle'; 
-            osc.frequency.setValueAtTime(523.25, now); // C
-            osc.frequency.setValueAtTime(659.25, now + 0.1); // E
-            osc.frequency.setValueAtTime(783.99, now + 0.2); // G
-            osc.frequency.setValueAtTime(1046.50, now + 0.3); // High C
-            gain.gain.setValueAtTime(0.1, now); 
-            gain.gain.linearRampToValueAtTime(0, now + 0.6); 
+            osc.type='triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.1);
+            osc.frequency.setValueAtTime(783.99, now + 0.2); osc.frequency.setValueAtTime(1046.50, now + 0.3);
+            gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.6); 
             osc.start(now); osc.stop(now + 0.6); 
         }
     }
 
+    // EXPANDED DATABASE
     const DB = [
         { f:"H₂O", mw:18, d:1.0, type:'covalent', atom:{'H':2,'O':1}, total:3, n:"น้ำ" },
         { f:"CO₂", mw:44, d:null, type:'covalent', atom:{'C':1,'O':2}, total:3, n:"คาร์บอนไดออกไซด์" },
@@ -436,7 +483,14 @@
         { f:"KMnO₄", mw:158, d:2.7, type:'ionic', atom:{'K':1,'Mn':1,'O':4}, total:6, n:"ด่างทับทิม" },
         { f:"He", mw:4, d:null, type:'element', atom:{'He':1}, total:1, n:"ฮีเลียม" },
         { f:"Ne", mw:20, d:null, type:'element', atom:{'Ne':1}, total:1, n:"นีออน" },
-        { f:"Fe", mw:56, d:7.87, type:'element', atom:{'Fe':1}, total:1, n:"เหล็ก" }
+        { f:"Fe", mw:56, d:7.87, type:'element', atom:{'Fe':1}, total:1, n:"เหล็ก" },
+        { f:"HNO₃", mw:63, d:1.51, type:'covalent', atom:{'H':1,'N':1,'O':3}, total:5, n:"กรดไนทริก" },
+        { f:"NaOH", mw:40, d:2.13, type:'ionic', atom:{'Na':1,'O':1,'H':1}, total:3, n:"โซดาไฟ" },
+        { f:"C₂H₅OH", mw:46, d:0.79, type:'covalent', atom:{'C':2,'H':6,'O':1}, total:9, n:"เอทานอล" },
+        { f:"CuSO₄", mw:159.5, d:3.6, type:'ionic', atom:{'Cu':1,'S':1,'O':4}, total:6, n:"จุนสี" },
+        { f:"O₂", mw:32, d:null, type:'element', atom:{'O':2}, total:2, n:"ออกซิเจน" },
+        { f:"N₂", mw:28, d:null, type:'element', atom:{'N':2}, total:2, n:"ไนโตรเจน" },
+        { f:"Cl₂", mw:71, d:null, type:'element', atom:{'Cl':2}, total:2, n:"คลอรีน" }
     ];
 
     const TopicNames = {
@@ -463,7 +517,7 @@
     let g = { hp:100, maxHp:100, mp:50, maxMp:50, xp:0, maxXp:25, lv:1, examScore:0, targetScore:14, q:null, timer:null, tMax:60, tCur:60, cls:'Pyro', isPoisoned:false, isBonus:false };
 
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function checkName() { if(document.getElementById('p-name').value) showScreen('scr-class'); }
+    function checkName() { if(document.getElementById('p-name').value) { if(ctx.state==='suspended') ctx.resume(); showScreen('scr-class'); } }
     function startGame(cls) {
         let sc = parseInt(document.getElementById('mid-score').value);
         if(isNaN(sc)||sc<0||sc>20) return alert("กรอกคะแนน 0-20");
@@ -499,11 +553,20 @@
     function getUnitName(type) {
         if(type === 'ionic') return { s:'fu', l:'หน่วยสูตร' };
         if(type === 'element') return { s:'atom', l:'อะตอม' };
-        return { s:'mc', l:'โมเลกุล' };
+        return { s:'mc', l:'โมเลกุล' }; // CHANGED mc -> โมเลกุล full text below
+    }
+
+    // FUNCTION TO GET HINT BASED ON TYPE
+    function getHint(type) {
+        if(type.includes('mol_g') || type.includes('g_mol')) return "n = g / MW";
+        if(type.includes('dm3')) return "n = V_STP / 22.4";
+        if(type.includes('part')) return "n = N / 6.02×10²³";
+        if(type.includes('density')) return "d = m / V";
+        if(type.includes('atom_count')) return "1 โมเลกุล = ผลรวมเลขห้อย";
+        return "ตัดหน่วยให้เหลือสิ่งที่ต้องการ";
     }
 
     function genQuest() {
-        // Auto Reset Calc & Hint
         cClr();
         document.getElementById('q-hint-box').style.display = 'none';
         document.getElementById('q-hint-box').innerHTML = '';
@@ -522,11 +585,18 @@
         
         let type = pool[Math.floor(Math.random()*pool.length)];
         let uInfo = getUnitName(c.type);
+        q.hintText = getHint(type); // Store hint
+
+        let unitNote = (uInfo.s === 'fu') ? " <span style='font-size:0.8em; color:var(--poison);'>(fu = หน่วยสูตร)</span>" : "";
+
+        // Using full text for molecule
+        let txt_part = uInfo.l;
+        let unit_part = uInfo.s === 'mc' ? 'โมเลกุล' : uInfo.s;
 
         let u_mol = `<span class="u-canc">mol</span>`;
         let u_g = `<span class="u-canc">g</span>`;
         let u_dm3 = `<span class="u-canc">dm³</span>`;
-        let u_part = `<span class="u-canc">${uInfo.s}</span>`;
+        let u_part = `<span class="u-canc">${unit_part}</span>`;
         
         let showMW = (type.includes('g') || type.includes('mw') || type === 'density_m_v' || type === 'density_v_m') ? ` (MW = ${c.mw})` : "";
         if(type === 'mw_calc') showMW = "";
@@ -584,8 +654,8 @@
                 break;
             case 'mol_part':
                 q.ans = n * 6.02; q.unit = "×10²³";
-                q.txt = `${c.f} จำนวน ${n} mol มีกี่${uInfo.l}? (ตอบเฉพาะเลขข้างหน้า ×10²³)`;
-                q.sol1 = factorBox([{top:`${n} ${u_mol} ${c.f}`, bot:"1"}, {top:`6.02×10²³ ${uInfo.s}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)}×10²³ ${uInfo.s}`}]);
+                q.txt = `${c.f} จำนวน ${n} mol มีกี่${txt_part}? ${unitNote}<br>(ตอบเฉพาะเลขข้างหน้า ×10²³)`;
+                q.sol1 = factorBox([{top:`${n} ${u_mol} ${c.f}`, bot:"1"}, {top:`6.02×10²³ ${unit_part}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)}×10²³ ${unit_part}`}]);
                 q.desc = `ใช้เลขอาโวกาโดร 6.02×10²³ ต่อ 1 mol`;
                 q.sol2 = formulaBox(
                     `<b>กำหนดตัวแปร:</b><br>n (โมล) = ${n} mol<br>Av (เลขอาโวกาโดร) = 6.02×10²³`, 
@@ -596,7 +666,7 @@
                 break;
             case 'part_mol':
                 let p = (n * 6.02).toFixed(2); q.ans = p/6.02; q.unit = "mol";
-                q.txt = `${c.f} จำนวน ${p}×10²³ ${uInfo.l} คิดเป็นกี่โมล?`;
+                q.txt = `${c.f} จำนวน ${p}×10²³ ${txt_part} คิดเป็นกี่โมล? ${unitNote}`;
                 q.sol1 = factorBox([{top:`${p}×10²³ ${u_part}`, bot:"1"}, {top:`1 mol ${c.f}`, bot:`6.02×10²³ ${u_part}`, res:`${q.ans.toFixed(2)} mol`}]);
                 q.desc = `หารด้วย 6.02×10²³ เพื่อทำเป็นโมล`;
                 q.sol2 = formulaBox(
@@ -633,9 +703,9 @@
                 break;
             case 'mw_calc':
                 let logic = []; let sum = 0;
-                let awMap = {H:1, C:12, O:16, N:14, S:32, Na:23, Cl:35.5, Ca:40, K:39, Mn:55, Fe:56, He:4, Ne:20};
+                let awMap = {H:1, C:12, O:16, N:14, S:32, Na:23, Cl:35.5, Ca:40, K:39, Mn:55, Fe:56, He:4, Ne:20, Cu:63.5};
                 let formulaStr = Object.entries(c.atom).map(([k,v]) => {
-                    let w = awMap[k]; logic.push(`(${v}×${w})`); sum += v*w; return `${k}=${w}`;
+                    let w = awMap[k] || 1; logic.push(`(${v}×${w})`); sum += v*w; return `${k}=${w}`;
                 }).join(', ');
                 q.ans = sum; q.unit = "g/mol";
                 q.txt = `จงหามวลโมเลกุล (MW) ของ ${c.f} (กำหนด ${formulaStr})`;
@@ -681,7 +751,7 @@
                 break;
             case 'challenge_part_g':
                 let pt = (n * 6.02).toFixed(2); q.ans = (pt/6.02)*c.mw; q.unit = "g";
-                q.txt = `[BONUS] ${c.f}${showMW} จำนวน ${pt}×10²³ ${uInfo.s} มีมวลกี่กรัม?`;
+                q.txt = `[BONUS] ${c.f}${showMW} จำนวน ${pt}×10²³ ${unit_part} มีมวลกี่กรัม? ${unitNote}`;
                 q.sol1 = factorBox([{top:`${pt}×10²³ ${u_part}`, bot:"1"}, {top:`1 ${u_mol} ${c.f}`, bot:`6.02×10²³ ${u_part}`}, {top:`${c.mw} g ${c.f}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} g`}]);
                 q.desc = `ขั้น 1: เปลี่ยนอนุภาคเป็น mol (หาร 6.02..)<br>ขั้น 2: เปลี่ยน mol เป็น g (คูณ MW)`;
                 q.sol2 = formulaBox(
@@ -698,7 +768,6 @@
         g.q = q;
         document.getElementById('q-topic').innerText = TopicNames[type] || type;
         document.getElementById('q-main').innerHTML = q.txt;
-        document.getElementById('q-sub').innerText = "เลือกวิธีทำเพื่อดูเฉลย";
         
         document.getElementById('sol-content').innerHTML = `
             <div style="margin-bottom:15px;">
@@ -739,16 +808,15 @@
         
         if(isCor) {
             playSfx('atk');
-            
-            // ANIMATION: Hero Attacks!
+            document.getElementById('app').classList.add('anim-correct');
             document.getElementById('hero-img').classList.add('anim-atk-hero');
             document.getElementById('enemy-img').classList.add('anim-shake');
             setTimeout(() => {
+                document.getElementById('app').classList.remove('anim-correct');
                 document.getElementById('hero-img').classList.remove('anim-atk-hero');
                 document.getElementById('enemy-img').classList.remove('anim-shake');
-            }, 400);
+            }, 500);
 
-            // Random Positive Feedback
             let praise = PositivePhrases[Math.floor(Math.random() * PositivePhrases.length)];
             document.getElementById('res-title').innerHTML = `<span style='color:#10b981'>✅ ${praise}</span>`;
             
@@ -763,14 +831,15 @@
             };
         } else {
             playSfx('wrong');
-            
-            // ANIMATION: Enemy Attacks!
-            document.getElementById('enemy-img').classList.add('anim-atk-enemy');
+            document.getElementById('app').classList.add('anim-shake-screen');
             document.getElementById('app').classList.add('anim-dmg');
+            document.getElementById('enemy-img').classList.add('anim-atk-enemy');
+            
             setTimeout(() => {
-                document.getElementById('enemy-img').classList.remove('anim-atk-enemy');
+                document.getElementById('app').classList.remove('anim-shake-screen');
                 document.getElementById('app').classList.remove('anim-dmg');
-            }, 400);
+                document.getElementById('enemy-img').classList.remove('anim-atk-enemy');
+            }, 500);
 
             g.hp = Math.max(0, g.hp - 10);
             updateHUD();
@@ -793,12 +862,23 @@
         let msg = "", col = "";
         
         if(rng < 0.2) {
-            g.isPoisoned = true; g.hp-=5; msg="☠️ กับดักพิษ! (HP-1/Turn)"; col="var(--poison)"; playSfx('wrong');
-        } else if(rng < 0.4) {
+            // POISON (20%)
+            g.isPoisoned = true; g.hp-=5; 
+            msg="☠️ กับดักพิษ! (โดนพิษเรื้อรัง)"; col="var(--poison)"; playSfx('wrong');
+        } else if(rng < 0.3) {
+            // CURSE (10%) - NEW
+            g.hp = Math.max(0, g.hp-10);
+            msg="🔮 คำสาปมรณะ! (HP -10 ทันที)"; col="var(--curse)"; playSfx('wrong');
+            document.getElementById('app').classList.add('anim-dmg');
+            setTimeout(() => document.getElementById('app').classList.remove('anim-dmg'), 500);
+        } else if(rng < 0.5) {
+            // HEAL
             g.hp = Math.min(g.hp+30, g.maxHp); msg="💖 ได้ยาฟื้นเลือด (+30 HP)"; col="#ef4444"; playSfx('win');
-        } else if(rng < 0.6) {
+        } else if(rng < 0.7) {
+            // MANA
             g.mp = Math.min(g.mp+20, g.maxMp); msg="💧 ได้ยามานา (+20 MP)"; col="var(--primary)"; playSfx('win');
         } else {
+            // EXP
             g.xp += xp; msg=`✨ ได้รับ EXP (+${xp})`; col="var(--gold)"; playSfx('win');
         }
         
@@ -818,7 +898,13 @@
 
     function resetGame() { showScreen('scr-landing'); }
     function nextQuest() {
-        if(g.isPoisoned) { g.hp--; if(g.hp<=0) resetGame(); }
+        // Poison Logic (-2 per turn)
+        if(g.isPoisoned) { 
+            g.hp = Math.max(0, g.hp - 2);
+            document.getElementById('app').classList.add('anim-dmg');
+            setTimeout(() => document.getElementById('app').classList.remove('anim-dmg'), 300);
+            if(g.hp<=0) resetGame(); 
+        }
         updateHUD(); genQuest();
     }
     
@@ -834,8 +920,13 @@
     // Calc Logic
     function toggleCalc() { 
         let c = document.getElementById('calc'); let game = document.getElementById('scr-game');
-        if(c.style.display==='flex'){ c.style.display='none'; game.classList.remove('calc-mode'); }
-        else{ c.style.display='flex'; game.classList.add('calc-mode'); }
+        if(c.style.display==='flex'){ 
+            c.style.display='none'; game.classList.remove('calc-mode'); 
+        } else { 
+            c.style.display='flex'; game.classList.add('calc-mode'); 
+            // Copy Current Question to Calc Display
+            document.getElementById('calc-q-display').innerHTML = g.q.txt || "โจทย์...";
+        }
     }
     function cIn(v){ document.getElementById('c-disp').value+=v; }
     function cClr(){ document.getElementById('c-disp').value=''; }
@@ -865,14 +956,8 @@
         else if(t==='hint') { 
             if(g.mp < 10) return alert('MP ไม่พอ (ต้องการ 10)');
             g.mp-=10; 
-            let hint = "";
-            if(g.q.txt.includes('STP')) hint = "STP ใช้เลข 22.4";
-            else if(g.q.txt.includes('MW') || g.q.txt.includes('มวล')) hint = "เปลี่ยนโมลเป็นกรัม ใช้ MW คูณ";
-            else if(g.q.txt.includes('×10²³')) hint = "เปลี่ยนโมลเป็นอนุภาค คูณ 6.02×10²³";
-            else if(g.q.txt.includes('d =')) hint = "ความหนาแน่น d = มวล(g) / ปริมาตร(cm³)";
-            else hint = "ตัดหน่วยให้เหลือสิ่งที่ต้องการ";
-            
-            document.getElementById('q-hint-box').innerHTML = hint; 
+            // NEW SPECIFIC HINT LOGIC
+            document.getElementById('q-hint-box').innerHTML = g.q.hintText; 
             document.getElementById('q-hint-box').style.display='block'; updateHUD(); 
         }
     }
