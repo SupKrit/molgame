@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mol Impact: Exam Edition</title>
+    <title>Mol Impact: Remedial Exam Arc</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&family=Kanit:wght@400;600;800;900&display=swap'); 
         :root {
-            --bg-dark: #020617;
+            --bg-dark: #0f172a;
             --primary: #6366f1;
             --accent: #f43f5e;
             --gold: #fbbf24;
             --cyan: #06b6d4;
-            --glass: rgba(30, 41, 59, 0.85);
+            --glass: rgba(30, 41, 59, 0.95);
             --glass-border: rgba(255, 255, 255, 0.15);
             --poison: #a855f7;
             --curse: #581c87;
         }
         body { 
             font-family: 'Sarabun', sans-serif; 
-            background: #0f172a;
+            background: #020617;
             color: #f1f5f9; margin: 0; position: fixed; inset:0; 
             overflow: hidden; display: flex; justify-content: center; user-select: none;
         }
         #app { 
             width: 100%; max-width: 480px; height: 100%; 
             display: flex; flex-direction: column; position: relative; 
-            background: url('https://www.transparenttextures.com/patterns/stardust.png'), radial-gradient(circle at 50% 0%, #1e1b4b, #020617);
+            background: url('https://www.transparenttextures.com/patterns/stardust.png'), radial-gradient(circle at 50% 10%, #1e1b4b, #020617);
             box-shadow: 0 0 50px rgba(0,0,0,0.8);
             transition: 0.3s;
         }
@@ -53,6 +53,18 @@
         .btn-red { background: linear-gradient(135deg, var(--accent), #9f1239); }
         .btn-cyan { background: linear-gradient(135deg, var(--cyan), #0891b2); }
         
+        /* ปุ่มโจมตี */
+        .btn-atk {
+            background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 6px 0 #7f1d1d, 0 5px 20px rgba(220, 38, 38, 0.6);
+            font-size: 1.4em; font-weight: 900; letter-spacing: 1px;
+            flex: 1; text-shadow: 0 2px 2px rgba(0,0,0,0.3);
+            animation: pulse-atk 2s infinite;
+        }
+        @keyframes pulse-atk { 0%{transform:scale(1);} 50%{transform:scale(1.02);} 100%{transform:scale(1);} }
+        .btn-atk:active { transform: translateY(4px) scale(0.98); box-shadow: 0 2px 0 #7f1d1d; }
+
         .input-box {
             background: rgba(15, 23, 42, 0.8); border: 1px solid var(--glass-border);
             color: white; padding: 12px; border-radius: 12px;
@@ -61,38 +73,97 @@
         }
         .input-box:focus { border-color: var(--gold); box-shadow: 0 0 15px rgba(251, 191, 36, 0.2); }
         
-        /* --- HUD --- */
+        /* --- HUD (UPGRADED SIZE) --- */
         .hud {
-            padding: 10px 15px; background: linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0) 100%);
-            display: flex; gap: 10px; z-index: 50; flex-shrink: 0;
+            padding: 15px; background: linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0) 100%);
+            display: flex; gap: 15px; z-index: 50; flex-shrink: 0; align-items: center;
         }
         .char-frame {
-            position: relative; width: 60px; height: 60px;
-            background: linear-gradient(135deg, #334155, #0f172a);
-            border-radius: 14px; border: 2px solid var(--glass-border);
-            display: flex; justify-content: center; align-items: center; font-size: 2.5em;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            position: relative; width: 90px; height: 90px; flex-shrink: 0;
+            background: #0f172a; border-radius: 16px; border: 3px solid var(--gold);
+            display: flex; justify-content: center; align-items: center; overflow:hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6); margin-top: 5px;
         }
+        .char-frame img { width: 100%; height: 100%; object-fit: cover; }
         .poison-indicator {
-            position: absolute; top: -5px; right: -5px; background: var(--poison);
-            width: 20px; height: 20px; border-radius: 50%; font-size: 12px;
+            position: absolute; top: 0; right: 0; background: var(--poison);
+            width: 24px; height: 24px; border-radius: 50%; font-size: 14px;
             display: flex; align-items: center; justify-content: center;
-            border: 2px solid #fff; z-index: 10; animation: pulse 1s infinite;
+            border: 2px solid #fff; z-index: 20; animation: pulse 1s infinite;
         }
         .lv-badge {
-            position: absolute; bottom: -8px; background: var(--gold); color: #000;
-            font-size: 0.7em; font-weight: 900; padding: 2px 6px; border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-family: 'Kanit';
+            position: absolute; bottom: 0; width: 100%;
+            background: var(--gold); color: #000; padding: 3px 0;
+            font-size: 0.85em; font-weight: 900; text-align: center; 
+            font-family: 'Kanit'; z-index: 20;
         }
-        .stat-group { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
-        .bar-row { display: flex; align-items: center; gap: 6px; font-size: 0.75em; font-weight: 600; color: #cbd5e1; }
-        .bar-bg { flex: 1; height: 8px; background: rgba(0,0,0,0.6); border-radius: 4px; overflow: hidden; }
-        .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .stat-group { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+        .bar-row { display: flex; align-items: center; gap: 8px; font-size: 0.95em; font-weight: 800; color: #cbd5e1; font-family:'Kanit'; }
+        .bar-bg { 
+            flex: 1; height: 20px; background: rgba(0,0,0,0.6); border-radius: 10px; 
+            overflow: hidden; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .bar-fill { height: 100%; border-radius: 10px; transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .bar-text {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; color: white; text-shadow: 1px 1px 2px black; letter-spacing: 0.5px; pointer-events: none;
+        }
         
-        /* --- STAGE --- */
-        .stage { flex: 1; display: flex; justify-content: space-around; align-items: center; position: relative; }
-        .sprite { font-size: 6em; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transition: 0.3s; position: relative; }
+        /* --- BOSS HP BAR --- */
+        #boss-hud {
+            position: absolute; top: 135px; left: 0; right: 0; z-index: 40;
+            display: flex; flex-direction: column; align-items: center; padding: 0 20px;
+            pointer-events: none;
+        }
+        .boss-hp-frame {
+            height: 18px; background: rgba(0,0,0,0.8); border: 2px solid #475569;
+            border-radius: 10px; overflow: hidden; position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3); transition: width 0.5s ease-out;
+            margin-top: 5px;
+        }
+        .boss-hp-fill {
+            height: 100%; background: linear-gradient(90deg, #dc2626, #991b1b);
+            width: 100%; transition: width 0.5s ease-out; position: relative;
+        }
+        .boss-hp-fill::after {
+            content: ""; position: absolute; inset: 0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.1) 5px, rgba(255,255,255,0.1) 10px);
+        }
+
+        /* --- STAGE (Super Blend) --- */
+        .stage { 
+            flex: 1; display: flex; justify-content: space-between; align-items: flex-end; 
+            position: relative; padding: 0 10px 40px 10px; 
+            background: linear-gradient(180deg, #e2e8f0 0%, #f8fafc 50%, #ffffff 80%, #ffffff 100%);
+            box-shadow: inset 0 10px 40px rgba(0,0,0,0.15);
+        }
         
+        .char-sprite {
+            width: 200px; height: auto; max-height: 240px;
+            filter: drop-shadow(0 0 0 rgba(0,0,0,0)); 
+            transition: transform 0.2s; position: relative; z-index: 5;
+            object-fit: contain; mix-blend-mode: multiply;
+            -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+        }
+        .enemy-sprite {
+            width: 220px; height: auto; max-height: 270px;
+            filter: drop-shadow(0 0 0 rgba(0,0,0,0));
+            position: relative; z-index: 5;
+            object-fit: contain; mix-blend-mode: multiply;
+            -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+        }
+
+        .combo-text {
+            position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+            font-family: 'Kanit'; font-weight: 900; font-size: 2.5em; color: var(--gold);
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; opacity: 0; pointer-events: none; z-index: 80;
+        }
+        .anim-combo { animation: popup 0.8s ease-out forwards; }
+        @keyframes popup { 0%{transform:translateX(-50%) scale(0.5); opacity:0;} 50%{transform:translateX(-50%) scale(1.5); opacity:1;} 100%{transform:translateX(-50%) scale(1); opacity:0; top: 10%;} }
+
         /* --- PANEL & FACTOR --- */
         .panel {
             background: rgba(15, 23, 42, 0.95); border-radius: 24px 24px 0 0;
@@ -101,7 +172,7 @@
             z-index: 60;
         }
         .q-card {
-            background: rgba(30, 41, 59, 0.4); border: 1px solid var(--glass-border);
+            background: rgba(30, 41, 59, 0.6); border: 1px solid var(--glass-border);
             border-radius: 16px; padding: 15px; text-align: center; position: relative;
             margin-bottom: 15px;
         }
@@ -110,182 +181,153 @@
             color: white; font-size: 0.7em; padding: 2px 8px; border-radius: 10px;
             font-weight: bold; box-shadow: 0 0 10px var(--accent); animation: pulse 1s infinite;
         }
+        
+        .topic-badge {
+            font-size: 1.2em; color: var(--gold); font-weight: bold; font-family: 'Kanit';
+            background: rgba(251, 191, 36, 0.1); border: 1px solid var(--gold);
+            padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 8px;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+        }
 
-        /* --- FACTOR CSS --- */
-        .factor-container {
-            display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 5px; row-gap: 15px;
-        }
-        .fraction { 
-            display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 2px;
-            font-size: 0.9em; 
-        }
-        .frac-top { 
-            border-bottom: 2px solid #cbd5e1; padding: 2px 6px; 
-            font-weight: 600; color: var(--primary); line-height: 1.2;
-            white-space: nowrap;
-        }
-        .frac-bot { 
-            padding: 2px 6px; 
-            font-weight: 600; color: var(--accent); line-height: 1.2;
-            white-space: nowrap;
-        }
+        .factor-container { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 5px; row-gap: 15px; }
+        .fraction { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 2px; font-size: 0.9em; }
+        .frac-top { border-bottom: 2px solid #cbd5e1; padding: 2px 6px; font-weight: 600; color: var(--primary); line-height: 1.2; white-space: nowrap; }
+        .frac-bot { padding: 2px 6px; font-weight: 600; color: var(--accent); line-height: 1.2; white-space: nowrap; }
         .u-canc { opacity: 0.6; text-decoration: line-through; color: #94a3b8; }
         .x-sign { font-weight: bold; color: #94a3b8; margin: 0 2px; }
 
         /* Chest & Calc */
         .chest-grid { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
         .chest-item {
-            width: 80px; height: 80px;
-            background: linear-gradient(to bottom, #f59e0b, #92400e);
-            border: 3px solid #fcd34d; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2.5em; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: transform 0.1s;
+            width: 80px; height: 80px; background: linear-gradient(to bottom, #f59e0b, #92400e);
+            border: 3px solid #fcd34d; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 2.5em; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: transform 0.1s;
         }
         .chest-item:hover { transform: scale(1.02); }
         .chest-item:active { transform: scale(0.95); }
 
         .ios-calc-btn {
-            width: 50px; height: 50px; background: #ff9500; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 0 #b45309; flex-shrink: 0;
+            width: 55px; height: 55px; 
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 16px; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; gap:2px;
+            cursor: pointer; box-shadow: 0 4px 0 #b45309, 0 5px 10px rgba(0,0,0,0.3);
+            flex-shrink: 0; color: white; transition: transform 0.1s;
         }
         .ios-calc-btn:active { transform: translateY(2px); box-shadow: none; }
-        
-        /* IMPROVED CALCULATOR STYLE */
-        .calc-overlay {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            height: 65%; /* เพิ่มความสูงเพื่อให้มีที่วางโจทย์ */
-            background: #1e293b; border-radius: 24px 24px 0 0; z-index: 100;
-            display: none; flex-direction: column; 
-            padding: 15px;
-            box-sizing: border-box;
-            border-top: 2px solid var(--cyan); animation: slideUp 0.3s;
-            box-shadow: 0 -10px 50px rgba(0,0,0,0.9);
-        }
-        
-        .calc-q-box {
-            background: rgba(15,23,42,0.6); border: 1px solid var(--cyan);
-            padding: 10px; border-radius: 12px; margin-bottom: 10px;
-            font-size: 0.9em; color: #cbd5e1;
-            max-height: 60px; overflow-y: auto; flex-shrink: 0;
-        }
+        .calc-icon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 24px; height: 24px; opacity: 0.9; }
+        .c-dot { background: white; border-radius: 2px; }
 
-        .calc-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); 
-            gap: 10px;
-            flex: 1;
-            max-width: 400px; margin: 0 auto; width: 100%;
+        /* CALCULATOR */
+        .calc-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0; background: #1e293b; border-radius: 24px 24px 0 0; z-index: 100;
+            display: none; flex-direction: column; padding: 10px; box-sizing: border-box;
+            border-top: 2px solid var(--cyan); animation: slideUp 0.3s; box-shadow: 0 -10px 50px rgba(0,0,0,0.9); height: auto; max-height: 80%;
         }
+        .calc-q-box {
+            background: rgba(6, 182, 212, 0.1); border: 1px solid var(--cyan); padding: 8px; border-radius: 8px; margin-bottom: 8px;
+            font-size: 0.9em; color: #cbd5e1; font-weight: bold; max-height: 60px; overflow-y: auto; flex-shrink: 0;
+        }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; max-width: 380px; margin: 0 auto; }
         .c-btn {
-            background: #334155; color: white; border: none; border-radius: 12px;
-            font-size: 1.4em; font-family: 'Kanit'; font-weight: 600;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.3); transition: 0.1s;
+            background: #334155; color: white; border: none; border-radius: 8px; font-size: 1.2em; font-family: 'Kanit'; font-weight: 600;
+            height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 0 rgba(0,0,0,0.3); transition: 0.1s;
         }
-        .c-btn:active { transform: translateY(3px); box-shadow: none; }
-        .c-op { background: var(--gold); color: black; font-size: 1.6em; }
-        
-        /* ป้องกันตัวเลขตกขอบ */
+        .c-btn:active { transform: translateY(2px); box-shadow: none; }
+        .c-op { background: var(--gold); color: black; font-size: 1.8em; }
         #c-disp {
-            width: 100%; box-sizing: border-box;
-            background: rgba(0,0,0,0.3); border-radius: 8px;
-            padding: 5px 10px;
-            white-space: nowrap; overflow: hidden;
+            width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 5px 10px;
+            white-space: nowrap; overflow: hidden; margin-bottom: 8px; font-size: 2em; text-align: right; color: white; border: none; font-family:'Kanit';
         }
-        
         @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
 
         /* Sol Box */
         .sol-box {
-            background: white; color: #1e293b; border-radius: 16px; 
-            max-width: 500px; width: 95%; margin: auto; max-height: 90vh; display: flex; flex-direction: column;
-            overflow: hidden;
+            background: white; color: #1e293b; border-radius: 16px; max-width: 500px; width: 95%; margin: auto; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
         }
         .sol-content { padding: 20px; overflow-y: auto; font-size: 0.95em; line-height: 1.6; }
         
-        /* Skills & Class */
+        /* Skills */
         .skill-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
-        .sk-btn { 
-            padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 65px;
-        }
+        .sk-btn { padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 65px; }
         .sk-name { font-size: 0.85em; font-weight: bold; line-height: 1.2; }
         .sk-cost { font-size: 0.7em; opacity: 0.9; margin-top: 2px; }
 
         .cls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .cls-card {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            padding: 15px; border-radius: 16px; text-align: center; cursor: pointer;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 15px; border-radius: 16px; text-align: center; cursor: pointer;
             display: flex; flex-direction: column; align-items: center;
         }
 
         /* Animations */
-        @keyframes atk-r { 0%{transform:translateX(0) scaleX(-1)} 50%{transform:translateX(80px) scaleX(-1)} 100%{transform:translateX(0) scaleX(-1)} }
-        @keyframes atk-l { 0%{transform:translateX(0)} 50%{transform:translateX(-80px)} 100%{transform:translateX(0)} }
+        @keyframes atk-hero { 0%{transform:translateX(0)} 50%{transform:translateX(50px)} 100%{transform:translateX(0)} }
+        @keyframes atk-enemy { 0%{transform:translateX(0)} 50%{transform:translateX(-50px)} 100%{transform:translateX(0)} }
+        @keyframes dmg-flash { 0%{filter:brightness(1);} 50%{filter:brightness(5) sepia(1) hue-rotate(-50deg) saturate(5);} 100%{filter:brightness(1);} }
         
-        @keyframes shake-screen { 
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
-        @keyframes flash-red { 0%{box-shadow: inset 0 0 0 red;} 50%{box-shadow: inset 0 0 100px red;} 100%{box-shadow: inset 0 0 0 red;} }
-        @keyframes flash-green { 0%{box-shadow: inset 0 0 0 #10b981;} 50%{box-shadow: inset 0 0 50px #10b981;} 100%{box-shadow: inset 0 0 0 #10b981;} }
+        .anim-atk-hero { animation: atk-hero 0.3s ease-in-out; }
+        .anim-atk-enemy { animation: atk-enemy 0.3s ease-in-out; }
+        .anim-dmg-sprite { animation: dmg-flash 0.4s; }
         
-        .anim-atk-hero { animation: atk-r 0.3s ease-in-out; }
-        .anim-atk-enemy { animation: atk-l 0.3s ease-in-out; }
-        .anim-shake-screen { animation: shake-screen 0.5s; }
-        .anim-dmg { animation: flash-red 0.5s; }
-        .anim-correct { animation: flash-green 0.5s; }
+        @keyframes shake-screen { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(0, 0); } }
+        .anim-shake-screen { animation: shake-screen 0.4s; }
 
-        .calc-mode .stage { flex: 0; height: 100px; min-height: 100px; overflow: hidden; } 
+        .calc-mode .stage { flex: 0; height: 60px; min-height: 60px; overflow: hidden; opacity: 0.3; } 
         .calc-mode .skill-grid { display: none; }
+        .calc-mode .hud { display:none; }
+        .calc-mode #boss-hud { display:none; } 
+
+        .confetti { position: absolute; width: 10px; height: 10px; background: #f00; animation: fall linear forwards; z-index: 999; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
     </style>
 </head>
 <body>
+    <audio id="bgm" loop>
+        <source src="https://opengameart.org/sites/default/files/Heroic%20Demise%20%28New%29_0.mp3" type="audio/mpeg">
+    </audio>
+
 <div id="app">
     <div id="scr-landing" class="screen active" style="align-items:center; justify-content:center;">
         <div style="text-align:center; animation: fadeIn 1s;">
             <div style="font-size:3.5em; font-family:'Kanit'; font-weight:900; line-height:1; color:white; text-shadow:0 0 40px var(--primary);">MOL<br><span style="color:var(--primary)">IMPACT</span></div>
-            <div style="color:var(--cyan); letter-spacing:5px; font-size:0.8em; margin-top:10px; font-weight:600;">EXAM EDITION</div>
+            <div style="color:var(--cyan); letter-spacing:5px; font-size:0.8em; margin-top:10px; font-weight:600;">REMEDIAL EXAM ARC</div>
         </div>
         <div style="width:80%; max-width:320px; margin-top:40px;">
             <input type="text" id="p-name" class="input-box" placeholder="ชื่อเล่น (Nickname)" maxlength="10">
             <div style="margin-top:15px; background:rgba(251, 191, 36, 0.15); padding:10px; border-radius:10px; border:1px dashed var(--gold); text-align:center;">
                 <b style="color:var(--gold);">🏆 ภารกิจสอบแก้</b><br>
-                <span style="font-size:0.85em; color:#cbd5e1;">ต้องทำคะแนนรวมให้ได้ <b>14 คะแนน</b> ขึ้นไป<br>(คะแนนเก็บ + คะแนนในเกม) ถึงจะผ่าน!</span>
+                <span style="font-size:0.9em; color:#cbd5e1;">รวมคะแนนให้ได้ <b>14 คะแนน</b> ขึ้นไป<br>(คะแนนสอบกลางภาค + คะแนนเกม)</span>
             </div>
             <button class="btn" onclick="checkName()" style="margin-top:15px;">🚀 เริ่มเกม</button>
+            <div style="text-align:center; margin-top:10px; font-size:0.8em; color:#64748b;">♫ เปิดเสียงเพื่อความมันส์</div>
             <button class="btn" style="margin-top:10px; background:transparent; border:1px solid #475569;" onclick="showScreen('scr-howto')">📜 วิธีเล่น</button>
         </div>
     </div>
 
     <div id="scr-howto" class="screen" style="padding:25px;">
-        <h2 style="color:var(--gold); text-align:center; margin-bottom:10px;">📜 คู่มือนักผจญภัยเคมี</h2>
-        <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:16px; font-size:0.95em; line-height:1.7;">
-            <div style="margin-bottom:15px;">
-                <b style="color:var(--cyan); font-size:1.1em;">1. ภารกิจของคุณ</b><br>
-                ตอบโจทย์เคมีให้ถูกต้องเพื่อเก็บ XP และคะแนน!
+        <h2 style="color:var(--gold); text-align:center; margin-bottom:10px;">📜 คู่มือนักเรียนสอบแก้</h2>
+        <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:16px; font-size:0.9em; line-height:1.7;">
+            <div style="margin-bottom:15px; border-bottom:1px dashed #475569; padding-bottom:10px;">
+                <b style="color:var(--cyan); font-size:1.2em;">1. เป้าหมายภารกิจ</b><br>
+                เอาชีวิตรอดจากการสอบแก้กับครูปีศาจ!<br>
+                <span style="color:#fbbf24;">(คะแนนสอบกลางภาคที่คุณกรอก + คะแนนที่เล่นได้ในเกม) ต้อง ≥ 14 คะแนน</span>
             </div>
             <div style="margin-bottom:15px;">
-                <b style="color:var(--accent); font-size:1.1em;">2. การต่อสู้</b><br>
-                ตอบถูก: โจมตี + เลือกรางวัล<br>
-                ตอบผิด: โดนโจมตีสวนกลับ!
-            </div>
-            <div style="margin-bottom:15px;">
-                <b style="color:var(--poison); font-size:1.1em;">3. ระวังกับดัก!</b><br>
+                <b style="color:var(--primary); font-size:1.1em;">2. ระบบการเล่น</b><br>
                 <ul>
-                    <li><b>พิษ (Poison):</b> เลือดลด 2 หน่วยทุกตา</li>
-                    <li><b>คำสาป (Curse):</b> เลือดลดทันที 10 หน่วย!</li>
+                    <li><b>ตอบถูก:</b> โจมตีครู, ได้ EXP, เลือกกล่องสุ่ม</li>
+                    <li><b>ตอบผิด:</b> โดนครูตีสวนกลับ (HP ลด), ไม่ได้แต้ม</li>
+                    <li><b>Combo:</b> ตอบถูกติดกัน 3 ข้อขึ้นไป ได้โบนัสพิเศษ!</li>
+                    <li><b>Pity System:</b> ถ้าตอบผิดติดกัน 2 ข้อ ระบบจะส่งโจทย์ง่ายมาช่วยกู้ชีพ</li>
+                </ul>
+            </div>
+            <div style="margin-bottom:15px;">
+                <b style="color:var(--accent); font-size:1.1em;">3. สกิลประจำสายการเรียน</b><br>
+                <ul>
+                    <li><b style="color:#f43f5e">🔥 Pyro:</b> เลือดเยอะ + รีเลือดเอง (+2 HP/Turn)</li>
+                    <li><b style="color:#6366f1">💧 Hydro:</b> มานาเยอะ + รีมานาเอง (+2 MP/Turn)</li>
+                    <li><b style="color:#fbbf24">⚡ Electro:</b> ดวงดี (เจอโจทย์โบนัสบ่อย, ลดดาเมจกับดัก 50%)</li>
+                    <li><b style="color:#10b981">🌿 Dendro:</b> เรียนรู้ไว (ได้ EXP เยอะกว่าปกติ)</li>
                 </ul>
             </div>
         </div>
@@ -301,11 +343,11 @@
         <div class="cls-grid">
             <div class="cls-card" onclick="startGame('Pyro')">
                 <div style="font-size:35px;">🔥</div><div style="font-weight:bold; color:var(--accent);">Pyro</div>
-                <div style="font-size:0.75em; color:#cbd5e1;">Max HP สูง</div>
+                <div style="font-size:0.75em; color:#cbd5e1;">Regen HP</div>
             </div>
             <div class="cls-card" onclick="startGame('Hydro')">
                 <div style="font-size:35px;">💧</div><div style="font-weight:bold; color:var(--primary);">Hydro</div>
-                <div style="font-size:0.75em; color:#cbd5e1;">Max MP สูง</div>
+                <div style="font-size:0.75em; color:#cbd5e1;">Regen MP</div>
             </div>
             <div class="cls-card" onclick="startGame('Dendro')">
                 <div style="font-size:35px;">🌿</div><div style="font-weight:bold; color:#10b981;">Dendro</div>
@@ -321,58 +363,84 @@
     <div id="scr-game" class="screen">
         <div class="hud">
             <div class="char-frame" onclick="showStats()">
-                <span id="p-icon">🧙‍♂️</span>
+                <img src="https://i.ibb.co/vxTv2nWB/2.png" alt="Student Hero" onerror="this.src='https://placehold.co/150x150/2563eb/FFF?text=Hero'">
                 <div class="lv-badge" id="lv-txt">Lv.1</div>
                 <div id="poison-mark" class="poison-indicator" style="display:none;">☠️</div>
             </div>
             <div class="stat-group">
                 <div class="bar-row">
-                    <span>HP</span><div class="bar-bg"><div id="hp-bar" class="bar-fill" style="width:100%; background:var(--accent);"></div></div>
+                    <span>HP</span>
+                    <div class="bar-bg">
+                        <div id="hp-bar" class="bar-fill" style="width:100%; background:var(--accent);"></div>
+                        <div id="hp-text" class="bar-text">100/100</div>
+                    </div>
                 </div>
                 <div class="bar-row">
-                    <span>MP</span><div class="bar-bg"><div id="mp-bar" class="bar-fill" style="width:100%; background:var(--primary);"></div></div>
+                    <span>MP</span>
+                    <div class="bar-bg">
+                        <div id="mp-bar" class="bar-fill" style="width:100%; background:var(--primary);"></div>
+                        <div id="mp-text" class="bar-text">50/50</div>
+                    </div>
                 </div>
                 <div class="bar-row">
-                    <span style="color:var(--gold)">XP</span><div class="bar-bg"><div id="xp-bar" class="bar-fill" style="width:0%; background:var(--gold);"></div></div>
+                    <span style="color:var(--gold)">XP</span>
+                    <div class="bar-bg">
+                        <div id="xp-bar" class="bar-fill" style="width:0%; background:var(--gold);"></div>
+                        <div id="xp-text" class="bar-text">0/25</div>
+                    </div>
                 </div>
                 <div class="bar-row" style="margin-top:2px; justify-content:space-between;">
                     <span id="score-txt" style="color:var(--cyan); font-weight:bold;">0 คะแนน</span>
+                    <span id="combo-display" style="color:var(--gold); font-size:0.9em; display:none;">🔥 Combo x3!</span>
                 </div>
             </div>
         </div>
         <div style="height:4px; background:black; width:100%; flex-shrink:0;"><div id="time-bar" style="height:100%; width:100%; background:var(--cyan); transition: width 1s linear;"></div></div>
+        
         <div class="stage">
-            <div class="sprite" id="hero-img" style="transform: scaleX(-1);">🧙‍♂️</div>
-            <div class="sprite" id="enemy-img">👾</div>
+            <div id="boss-hud">
+                <div style="text-shadow:1px 1px 2px black; font-weight:bold; color:#cbd5e1; font-size:0.9em; background:rgba(0,0,0,0.5); padding:2px 8px; border-radius:10px;">BOSS: The Teacher</div>
+                <div id="boss-hp-frame" class="boss-hp-frame" style="width:100px;">
+                    <div id="boss-hp-bar" class="boss-hp-fill"></div>
+                </div>
+            </div>
+            
+            <div id="combo-anim" class="combo-text">COMBO!</div>
+            <img id="hero-img" class="char-sprite" src="https://i.ibb.co/vxTv2nWB/2.png" alt="Student" onerror="this.src='https://placehold.co/150x150/2563eb/FFF?text=Hero'">
+            <img id="enemy-img" class="enemy-sprite" src="https://i.ibb.co/b5qngBFh/1.png" alt="Dark Teacher" onerror="this.src='https://placehold.co/150x150/dc2626/FFF?text=Teacher'">
         </div>
+
         <div class="panel">
             <div class="skill-grid">
                 <button class="btn btn-green sk-btn" onclick="useSkill('heal')">
-                    <span class="sk-name">💖 Heal</span><span class="sk-cost">20 MP</span>
+                    <span class="sk-name">💖 Heal</span><span class="sk-cost" id="cost-heal">20 MP</span>
                 </button>
                 <button class="btn btn-cyan sk-btn" onclick="useSkill('time')">
-                    <span class="sk-name">⏳ Time</span><span class="sk-cost">15 MP</span>
+                    <span class="sk-name">⏳ Time</span><span class="sk-cost" id="cost-time">15 MP</span>
                 </button>
                 <button class="btn sk-btn" style="background:#475569;" onclick="useSkill('hint')">
-                    <span class="sk-name">💡 Hint</span><span class="sk-cost">10 MP</span>
+                    <span class="sk-name">💡 Hint</span><span class="sk-cost" id="cost-hint">10 MP</span>
                 </button>
                 <button class="btn btn-red sk-btn" onclick="useSkill('skip')">
-                    <span class="sk-name">⏭️ Skip</span><span class="sk-cost">30 MP</span>
+                    <span class="sk-name">⏭️ Skip</span><span class="sk-cost" id="cost-skip">30 MP</span>
                 </button>
             </div>
             <div class="q-card" id="q-card-box">
                 <div id="bonus-badge" class="bonus-tag" style="display:none;">🔥 BONUS</div>
-                <div style="font-size:0.9em; color:var(--primary); font-weight:bold; font-family:'Kanit';" id="q-topic">TOPIC</div>
+                <div class="topic-badge" id="q-topic">TOPIC</div>
                 <div id="q-main" style="font-size:1.1em; font-weight:bold; margin:8px 0;">...</div>
                 <div id="q-sub" style="color:#94a3b8; font-size:0.9em; display:none;"></div>
                 <div id="q-hint-box" style="display:none; margin-top:5px; padding:8px; background:rgba(251,191,36,0.1); border-radius:8px; color:var(--gold); font-size:1em; font-weight:bold; border:1px dashed var(--gold);"></div>
             </div>
             <form id="ans-form" style="display:flex; gap:10px;">
                 <div class="ios-calc-btn" onclick="toggleCalc()">
-                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="white" stroke-width="3" fill="none"><path d="M6 3 L6 21 M3 6 L21 6 M16 16 L20 20 M20 16 L16 20"></path></svg>
+                    <div class="calc-icon-grid">
+                        <div class="c-dot" style="background:var(--cyan)"></div><div class="c-dot" style="background:var(--gold)"></div>
+                        <div class="c-dot" style="background:white"></div><div class="c-dot" style="background:var(--accent)"></div>
+                    </div>
                 </div>
                 <input type="number" id="ans-in" class="input-box" placeholder="คำตอบ" step="any" autocomplete="off">
-                <button type="submit" class="btn" style="width:auto; min-width:80px;">⚔️</button>
+                <button type="submit" class="btn btn-atk">⚔️ ATTACK</button>
             </form>
         </div>
     </div>
@@ -393,6 +461,7 @@
         <div style="text-align:center;">
             <div style="font-size:3em; margin-bottom:10px;">🗝️</div>
             <h2 style="color:var(--gold); margin:0;">เลือกหีบรางวัล</h2>
+            <div id="chest-combo-msg" style="color:var(--accent); font-weight:bold; height:20px; margin-bottom:5px;"></div>
             <div class="chest-grid">
                 <div class="chest-item" onclick="selectChest(1)">📦</div>
                 <div class="chest-item" onclick="selectChest(2)">📦</div>
@@ -404,20 +473,19 @@
     </div>
 
     <div id="scr-win" class="screen" style="background:rgba(0,0,0,0.95); align-items:center; justify-content:center; text-align:center;">
-        <div style="font-size:5em;">🏆</div>
-        <h1 style="color:var(--gold);">CONGRATS!</h1>
-        <p>คุณสอบผ่านแล้ว!</p>
-        <p>คะแนนรวม: <span id="final-score"></span></p>
-        <button class="btn" style="width:200px; margin-top:20px;" onclick="resetGame()">เล่นใหม่</button>
+        <div id="confetti-container" style="position:fixed; inset:0; pointer-events:none; overflow:hidden;"></div>
+        <div style="font-size:5em; animation: pulse-atk 1s infinite;">🏆</div>
+        <h1 style="color:var(--gold); text-shadow:0 0 20px var(--gold);">CONGRATULATIONS!</h1>
+        <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; margin:20px; border:1px solid rgba(255,255,255,0.2);">
+            <p id="win-msg" style="font-size:1.2em; line-height:1.6; color:#f8fafc; margin:0; font-family:'Kanit';">...</p>
+        </div>
+        <p style="color:#94a3b8;">คะแนนรวม: <span id="final-score" style="color:var(--cyan); font-weight:bold; font-size:1.5em;"></span></p>
+        <button class="btn" style="width:200px; margin-top:20px; background:white; color:#0f172a;" onclick="resetGame()">เล่นใหม่</button>
     </div>
 
     <div id="calc" class="calc-overlay">
-        <div class="calc-q-box" id="calc-q-display">
-            โจทย์: ...
-        </div>
-        
-        <input id="c-disp" type="text" readonly style="font-size:2.5em; text-align:right; font-family:'Kanit'; color:white; border:none; margin-bottom:10px;" placeholder="0">
-        
+        <div class="calc-q-box" id="calc-q-display">โจทย์: ...</div>
+        <input id="c-disp" type="text" readonly placeholder="0">
         <div class="calc-grid">
             <button onclick="cClr()" class="c-btn" style="background:var(--accent);">C</button>
             <button onclick="cDel()" class="c-btn" style="background:#475569;">←</button>
@@ -434,17 +502,23 @@
             <button onclick="cIn('1')" class="c-btn">1</button>
             <button onclick="cIn('2')" class="c-btn">2</button>
             <button onclick="cIn('3')" class="c-btn">3</button>
-            <button onclick="cEval()" class="c-btn" style="grid-row:span 2; background:var(--primary); font-size:2em;">=</button>
-            <button onclick="cIn('0')" class="c-btn" style="grid-column:span 2;">0</button>
+            <button onclick="cEval()" class="c-btn" style="grid-row:span 2; background:var(--primary); font-size:1.5em;">=</button>
+            <button onclick="cIn('0')" class="c-btn" style="grid-column:span 2; aspect-ratio:auto;">0</button>
             <button onclick="cIn('.')" class="c-btn">.</button>
         </div>
-        <div style="text-align:center; color:#94a3b8; margin-top:10px; cursor:pointer; padding:5px;" onclick="toggleCalc()">🔻 ปิดเครื่องคิดเลข</div>
+        <div style="text-align:center; color:#94a3b8; margin-top:5px; cursor:pointer; padding:5px; font-size:0.8em;" onclick="toggleCalc()">🔻 ปิดเครื่องคิดเลข</div>
     </div>
 </div>
 
 <script>
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     const ctx = new AudioCtx();
+    let bgm = document.getElementById('bgm');
+    
+    function playBGM() {
+        bgm.volume = 0.3;
+        bgm.play().catch(e => console.log("Audio play blocked"));
+    }
     
     function playSfx(type) {
         if(ctx.state === 'suspended') ctx.resume();
@@ -470,7 +544,6 @@
         }
     }
 
-    // EXPANDED DATABASE
     const DB = [
         { f:"H₂O", mw:18, d:1.0, type:'covalent', atom:{'H':2,'O':1}, total:3, n:"น้ำ" },
         { f:"CO₂", mw:44, d:null, type:'covalent', atom:{'C':1,'O':2}, total:3, n:"คาร์บอนไดออกไซด์" },
@@ -496,8 +569,8 @@
     const TopicNames = {
         'mol_g': 'โมล ⮕ มวล (g)',
         'g_mol': 'มวล (g) ⮕ โมล',
-        'mol_dm3': 'โมล ⮕ ปริมาตรแก๊ส (STP)',
-        'dm3_mol': 'ปริมาตรแก๊ส (STP) ⮕ โมล',
+        'mol_vol': 'โมล ⮕ ปริมาตรแก๊ส (STP)',
+        'vol_mol': 'ปริมาตรแก๊ส (STP) ⮕ โมล',
         'mol_part': 'โมล ⮕ จำนวนอนุภาค',
         'part_mol': 'จำนวนอนุภาค ⮕ โมล',
         'mol_atom_count': 'โมลสาร ⮕ โมลอะตอมรวม',
@@ -509,23 +582,25 @@
         'challenge_part_g': 'BONUS: อนุภาค ⮕ มวล'
     };
 
-    const PositivePhrases = [
-        "เก่งมาก! 👍", "สุดยอดไปเลย! 🌟", "ถูกต้องนะครับ! ✅", 
-        "เฉียบขาด! ⚔️", "เยี่ยมยอด! 🤩", "ความพยายามอยู่ที่ไหน ความสำเร็จอยู่ที่นั่น! ✌️"
-    ];
-
-    let g = { hp:100, maxHp:100, mp:50, maxMp:50, xp:0, maxXp:25, lv:1, examScore:0, targetScore:14, q:null, timer:null, tMax:60, tCur:60, cls:'Pyro', isPoisoned:false, isBonus:false };
+    let g = { hp:100, maxHp:100, mp:50, maxMp:50, xp:0, maxXp:25, lv:1, examScore:0, startScore:0, targetScore:14, q:null, timer:null, tMax:60, tCur:60, cls:'Pyro', isPoisoned:false, isBonus:false, combo:0, wrongStreak:0, mpCostPer:100 };
 
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function checkName() { if(document.getElementById('p-name').value) { if(ctx.state==='suspended') ctx.resume(); showScreen('scr-class'); } }
+    function checkName() { if(document.getElementById('p-name').value) { if(ctx.state==='suspended') ctx.resume(); playBGM(); showScreen('scr-class'); } }
     function startGame(cls) {
         let sc = parseInt(document.getElementById('mid-score').value);
         if(isNaN(sc)||sc<0||sc>20) return alert("กรอกคะแนน 0-20");
-        g.examScore = sc; g.cls = cls; g.maxHp = (cls==='Pyro')?150:100; g.maxMp = (cls==='Hydro')?100:50;
-        g.hp=g.maxHp; g.mp=g.maxMp; g.xp=0; g.lv=1; g.isPoisoned=false;
-        updateHUD(); nextQuest(); showScreen('scr-game');
+        g.examScore = sc; g.startScore = sc; g.cls = cls; g.maxHp = (cls==='Pyro')?150:100; g.maxMp = (cls==='Hydro')?100:50;
+        g.hp=g.maxHp; g.mp=g.maxMp; g.xp=0; g.lv=1; g.isPoisoned=false; g.combo=0; g.wrongStreak=0; g.mpCostPer=100;
+        updateHUD(); updateSkillCosts(); nextQuest(); showScreen('scr-game');
     }
     
+    function updateSkillCosts() {
+        document.getElementById('cost-heal').innerText = Math.ceil(20 * g.mpCostPer/100) + " MP";
+        document.getElementById('cost-time').innerText = Math.ceil(15 * g.mpCostPer/100) + " MP";
+        document.getElementById('cost-hint').innerText = Math.ceil(10 * g.mpCostPer/100) + " MP";
+        document.getElementById('cost-skip').innerText = Math.ceil(30 * g.mpCostPer/100) + " MP";
+    }
+
     const factorBox = (steps) => {
         let h = `<div class="factor-container">`;
         steps.forEach((s,i) => {
@@ -550,16 +625,16 @@
         `;
     }
 
-    function getUnitName(type) {
-        if(type === 'ionic') return { s:'fu', l:'หน่วยสูตร' };
-        if(type === 'element') return { s:'atom', l:'อะตอม' };
-        return { s:'mc', l:'โมเลกุล' }; // CHANGED mc -> โมเลกุล full text below
+    function getUnitName(c) {
+        if(c.type === 'ionic') return { s:'fu', l:'หน่วยสูตร' };
+        if(c.type === 'covalent') return { s:'mc', l:'โมเลกุล' };
+        if(c.total > 1) return { s:'mc', l:'โมเลกุล' };
+        return { s:'atom', l:'อะตอม' };
     }
 
-    // FUNCTION TO GET HINT BASED ON TYPE
     function getHint(type) {
         if(type.includes('mol_g') || type.includes('g_mol')) return "n = g / MW";
-        if(type.includes('dm3')) return "n = V_STP / 22.4";
+        if(type.includes('vol') || type.includes('dm3')) return "n = V_STP / 22.4";
         if(type.includes('part')) return "n = N / 6.02×10²³";
         if(type.includes('density')) return "d = m / V";
         if(type.includes('atom_count')) return "1 โมเลกุล = ผลรวมเลขห้อย";
@@ -571,122 +646,134 @@
         document.getElementById('q-hint-box').style.display = 'none';
         document.getElementById('q-hint-box').innerHTML = '';
 
-        g.isBonus = Math.random() < 0.2; 
+        let bonusChance = (g.cls === 'Electro') ? 0.3 : 0.2;
+        g.isBonus = Math.random() < bonusChance; 
+        
         let c = DB[Math.floor(Math.random()*DB.length)];
         let n = (Math.random()*2 + 0.5).toFixed(1);
         let q = {};
         
-        const topicsBasic = ['mol_g', 'g_mol', 'mol_dm3', 'dm3_mol', 'mol_part', 'part_mol', 'mw_calc'];
+        const topicsBasic = ['mol_g', 'g_mol', 'mol_vol', 'vol_mol', 'mol_part', 'part_mol', 'mw_calc'];
         const topicsAdv = ['mol_atom_count', 'mol_elem_stoich', 'density_m_v', 'density_v_m'];
         const topicsHard = ['challenge_g_dm3', 'challenge_part_g'];
         
-        let pool = g.isBonus ? topicsHard : [...topicsBasic, ...topicsAdv];
-        if(!c.d) pool = pool.filter(t => !t.includes('density'));
+        let pool = [];
+        if(g.wrongStreak >= 2) {
+            pool = ['mol_g', 'g_mol', 'mw_calc']; 
+            document.getElementById('q-hint-box').innerText = "💡 ระบบ Pity: เอาข้อพื้นฐานไปเก็บแต้มก่อนนะ!";
+            document.getElementById('q-hint-box').style.display = 'block';
+        } else {
+            pool = g.isBonus ? topicsHard : [...topicsBasic, ...topicsAdv];
+            if(!c.d) pool = pool.filter(t => !t.includes('density'));
+        }
         
         let type = pool[Math.floor(Math.random()*pool.length)];
-        let uInfo = getUnitName(c.type);
-        q.hintText = getHint(type); // Store hint
-
+        let uInfo = getUnitName(c);
+        q.hintText = getHint(type); 
+        
         let unitNote = (uInfo.s === 'fu') ? " <span style='font-size:0.8em; color:var(--poison);'>(fu = หน่วยสูตร)</span>" : "";
-
-        // Using full text for molecule
-        let txt_part = uInfo.l;
+        let txt_part = uInfo.l; 
         let unit_part = uInfo.s === 'mc' ? 'โมเลกุล' : uInfo.s;
-
+        
         let u_mol = `<span class="u-canc">mol</span>`;
         let u_g = `<span class="u-canc">g</span>`;
-        let u_dm3 = `<span class="u-canc">dm³</span>`;
         let u_part = `<span class="u-canc">${unit_part}</span>`;
+
+        // --- Mass Label Logic ---
+        let massLabel = "MW"; 
+        let massNameTH = "มวลโมเลกุล";
         
-        let showMW = (type.includes('g') || type.includes('mw') || type === 'density_m_v' || type === 'density_v_m') ? ` (MW = ${c.mw})` : "";
+        if (c.type === 'ionic') {
+            massLabel = "FW";
+            massNameTH = "มวลสูตร";
+        } else if (c.type === 'element') {
+            if(c.total === 1) {
+                massLabel = "AW";
+                massNameTH = "มวลอะตอม";
+            } else {
+                massLabel = "MW"; // Elements like O2 still use MW in many contexts, but user said "if element, give atomic mass".
+                // However, for calculation of O2, we need 32. If we say AW=16, student might be confused with 32.
+                // The prompt says "ถ้าเป็นธาตุ ห้ามถามว่า MW แต่ให้มวลอะตอม" -> This implies for 'mw_calc' question mostly.
+                // For other calculations, we should use the correct term for the particle.
+            }
+        }
+        
+        let showMW = (type.includes('g') || type.includes('mw') || type.includes('density')) 
+                     ? ` (${massLabel} = ${c.mw} g/mol)` 
+                     : "";
         if(type === 'mw_calc') showMW = "";
 
         document.getElementById('bonus-badge').style.display = g.isBonus ? 'block' : 'none';
 
+        let vol_units = ['dm³', 'L', 'cm³', 'mL'];
+        let vUnit = vol_units[Math.floor(Math.random()*4)];
+        let vFactor = (vUnit === 'cm³' || vUnit === 'mL') ? 22400 : 22.4;
+        let u_vol = `<span class="u-canc">${vUnit}</span>`;
+
+        // QUEST GENERATION
         switch(type) {
             case 'mol_g':
                 q.ans = n * c.mw; q.unit = "g";
                 q.txt = `${c.f}${showMW} จำนวน ${n} mol มีมวลกี่กรัม?`;
                 q.sol1 = factorBox([{top:`${n} ${u_mol} ${c.f}`, bot:"1"}, {top:`${c.mw} g ${c.f}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} g`}]);
                 q.desc = `ตัดหน่วย mol ทิ้ง เหลือหน่วย g`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>n (โมล) = ${n} mol<br>MW (มวลโมเลกุล) = ${c.mw} g/mol`, 
-                    `m = n × MW <br><small style='color:#cbd5e1'>(m = มวลสาร)</small>`, 
-                    `m = ${n} × ${c.mw}`, 
-                    `${q.ans.toFixed(2)} g`
-                );
+                q.sol2 = formulaBox(`n=${n} mol, ${massLabel}=${c.mw}`, `m = n × ${massLabel}`, `m = ${n} × ${c.mw}`, `${q.ans.toFixed(2)} g`);
                 break;
             case 'g_mol':
                 let mass = (n * c.mw).toFixed(1); q.ans = mass/c.mw; q.unit = "mol";
                 q.txt = `${c.f}${showMW} มวล ${mass} g คิดเป็นกี่โมล?`;
                 q.sol1 = factorBox([{top:`${mass} ${u_g} ${c.f}`, bot:"1"}, {top:`1 mol ${c.f}`, bot:`${c.mw} ${u_g} ${c.f}`, res:`${q.ans.toFixed(2)} mol`}]);
                 q.desc = `ตัดหน่วย g ทิ้ง เหลือหน่วย mol`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>m (มวลสาร) = ${mass} g<br>MW (มวลโมเลกุล) = ${c.mw} g/mol`, 
-                    `n = m / MW <br><small style='color:#cbd5e1'>(n = โมล)</small>`, 
-                    `n = ${mass} / ${c.mw}`, 
-                    `${q.ans.toFixed(2)} mol`
-                );
+                q.sol2 = formulaBox(`m=${mass} g, ${massLabel}=${c.mw}`, `n = m / ${massLabel}`, `n = ${mass} / ${c.mw}`, `${q.ans.toFixed(2)} mol`);
                 break;
-            case 'mol_dm3':
-                q.ans = n * 22.4; q.unit = "dm³";
-                q.txt = `${c.f} (STP) จำนวน ${n} mol มีปริมาตรเท่าใด?`;
-                q.sol1 = factorBox([{top:`${n} ${u_mol} ${c.f}`, bot:"1"}, {top:`22.4 dm³ STP`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} dm³`}]);
-                q.desc = `ใช้ 22.4 dm³ ที่ STP ต่อ 1 mol`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>n (โมล) = ${n} mol<br>C (ค่าคงที่ STP) = 22.4 dm³/mol`, 
-                    `V = n × 22.4 <br><small style='color:#cbd5e1'>(V = ปริมาตร STP)</small>`, 
-                    `V = ${n} × 22.4`, 
-                    `${q.ans.toFixed(2)} dm³`
-                );
+            case 'mol_vol':
+                q.ans = n * vFactor; q.unit = vUnit;
+                q.txt = `${c.f} (STP) จำนวน ${n} mol มีปริมาตรเท่าใด (${vUnit})?`;
+                q.sol1 = factorBox([{top:`${n} ${u_mol} ${c.f}`, bot:"1"}, {top:`${vFactor} ${vUnit} STP`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} ${vUnit}`}]);
+                q.desc = `ใช้ ${vFactor} ${vUnit} ที่ STP ต่อ 1 mol`;
+                q.sol2 = formulaBox(`n=${n} mol, STP=${vFactor}`, `V = n × ${vFactor}`, `V = ${n} × ${vFactor}`, `${q.ans.toFixed(2)} ${vUnit}`);
                 break;
-            case 'dm3_mol':
-                let v = (n * 22.4).toFixed(1); q.ans = v/22.4; q.unit = "mol";
-                q.txt = `${c.f} (STP) ปริมาตร ${v} dm³ คิดเป็นกี่โมล?`;
-                q.sol1 = factorBox([{top:`${v} ${u_dm3}`, bot:"1"}, {top:`1 mol ${c.f}`, bot:`22.4 ${u_dm3}`, res:`${q.ans.toFixed(2)} mol`}]);
-                q.desc = `เปลี่ยนปริมาตรเป็นโมล หารด้วย 22.4`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>V (ปริมาตร STP) = ${v} dm³`, 
-                    `n = V / 22.4 <br><small style='color:#cbd5e1'>(n = โมล)</small>`, 
-                    `n = ${v} / 22.4`, 
-                    `${q.ans.toFixed(2)} mol`
-                );
+            case 'vol_mol':
+                let v = (n * vFactor).toFixed(1); q.ans = v/vFactor; q.unit = "mol";
+                q.txt = `${c.f} (STP) ปริมาตร ${v} ${vUnit} คิดเป็นกี่โมล?`;
+                q.sol1 = factorBox([{top:`${v} ${u_vol}`, bot:"1"}, {top:`1 mol ${c.f}`, bot:`${vFactor} ${u_vol}`, res:`${q.ans.toFixed(2)} mol`}]);
+                q.desc = `เปลี่ยนปริมาตรเป็นโมล หารด้วย ${vFactor}`;
+                q.sol2 = formulaBox(`V=${v} ${vUnit}`, `n = V / ${vFactor}`, `n = ${v} / ${vFactor}`, `${q.ans.toFixed(2)} mol`);
                 break;
             case 'mol_part':
-                q.ans = n * 6.02; q.unit = "×10²³";
-                q.txt = `${c.f} จำนวน ${n} mol มีกี่${txt_part}? ${unitNote}<br>(ตอบเฉพาะเลขข้างหน้า ×10²³)`;
-                q.sol1 = factorBox([{top:`${n} ${u_mol} ${c.f}`, bot:"1"}, {top:`6.02×10²³ ${unit_part}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)}×10²³ ${unit_part}`}]);
-                q.desc = `ใช้เลขอาโวกาโดร 6.02×10²³ ต่อ 1 mol`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>n (โมล) = ${n} mol<br>Av (เลขอาโวกาโดร) = 6.02×10²³`, 
-                    `N = n × 6.02×10²³ <br><small style='color:#cbd5e1'>(N = จำนวนอนุภาค)</small>`, 
-                    `N = ${n} × 6.02 (ตัด 10²³ ไว้ตอบในหน่วย)`, 
-                    `${q.ans.toFixed(2)}×10²³`
-                );
+                let askAtom = (c.total > 1) && (Math.random() > 0.5); 
+                
+                if(askAtom) {
+                    q.ans = n * c.total * 6.02; q.unit = "×10²³";
+                    q.txt = `${c.f} จำนวน ${n} mol มีจำนวนอะตอมทั้งหมดเท่าไร?<br>(ตอบเฉพาะเลขข้างหน้า ×10²³)`;
+                    q.sol1 = factorBox([
+                        {top:`${n} ${u_mol} ${c.f}`, bot:"1"},
+                        {top:`${c.total} <span class="u-canc">mol atom</span>`, bot:`1 ${u_mol} ${c.f}`},
+                        {top:`6.02×10²³ atom`, bot:`1 <span class="u-canc">mol atom</span>`, res:`${q.ans.toFixed(2)}×10²³`}
+                    ]);
+                    q.desc = `<b>ระวัง!</b> 1 โมเลกุล มี ${c.total} อะตอม<br>ต้องคูณจำนวนอะตอมในสูตรด้วย`;
+                    q.sol2 = formulaBox(`n=${n}, Atom/Mc=${c.total}`, `Atom = n × (เลขห้อยรวม) × 6.02`, `Atom = ${n} × ${c.total} × 6.02`, `${q.ans.toFixed(2)}×10²³`);
+                } else {
+                    q.ans = n * 6.02; q.unit = "×10²³";
+                    q.txt = `${c.f} จำนวน ${n} mol มีกี่${txt_part}? ${unitNote}<br>(ตอบเฉพาะเลขข้างหน้า ×10²³)`;
+                    q.sol1 = factorBox([{top:`${n} ${u_mol} ${c.f}`, bot:"1"}, {top:`6.02×10²³ ${unit_part}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)}×10²³`}]);
+                    q.desc = `ถามหาจำนวน${txt_part} ใช้เลขอาโวกาโดรคูณได้เลย`;
+                    q.sol2 = formulaBox(`n=${n} mol`, `N = n × (6.02×10²³)`, `N = ${n} × 6.02`, `${q.ans.toFixed(2)}×10²³`);
+                }
                 break;
             case 'part_mol':
                 let p = (n * 6.02).toFixed(2); q.ans = p/6.02; q.unit = "mol";
                 q.txt = `${c.f} จำนวน ${p}×10²³ ${txt_part} คิดเป็นกี่โมล? ${unitNote}`;
                 q.sol1 = factorBox([{top:`${p}×10²³ ${u_part}`, bot:"1"}, {top:`1 mol ${c.f}`, bot:`6.02×10²³ ${u_part}`, res:`${q.ans.toFixed(2)} mol`}]);
                 q.desc = `หารด้วย 6.02×10²³ เพื่อทำเป็นโมล`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>N (จำนวนอนุภาค) = ${p}×10²³`, 
-                    `n = N / (6.02×10²³) <br><small style='color:#cbd5e1'>(n = โมล)</small>`, 
-                    `n = (${p}×10²³) / (6.02×10²³)`, 
-                    `${q.ans.toFixed(2)} mol`
-                );
+                q.sol2 = formulaBox(`N=${p}×10²³`, `n = N / (6.02×10²³)`, `n = (${p}×10²³) / (6.02×10²³)`, `${q.ans.toFixed(2)} mol`);
                 break;
             case 'mol_atom_count':
                 q.ans = n * c.total; q.unit = "mol";
                 q.txt = `${c.f} จำนวน ${n} mol มีอะตอมองค์ประกอบรวมกี่โมล?`;
                 q.sol1 = factorBox([{top:`${n} mol ${c.f}`, bot:"1"}, {top:`${c.total} mol atom`, bot:`1 mol ${c.f}`, res:`${q.ans.toFixed(2)} mol`}]);
                 q.desc = `1 โมเลกุลมี ${c.total} อะตอม (นับเลขห้อยรวมกัน)`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>n (โมลสาร) = ${n} mol<br>Sub (เลขห้อยรวม) = ${c.total}`, 
-                    `n(อะตอม) = n(สาร) × เลขห้อยรวม`, 
-                    `n(อะตอม) = ${n} × ${c.total}`, 
-                    `${q.ans.toFixed(2)} mol`
-                );
+                q.sol2 = formulaBox(`n=${n}, ห้อยรวม=${c.total}`, `n(อะตอม) = n(สาร) × เลขห้อยรวม`, `n = ${n} × ${c.total}`, `${q.ans.toFixed(2)} mol`);
                 break;
             case 'mol_elem_stoich':
                 let elem = Object.keys(c.atom)[0]; let count = c.atom[elem];
@@ -694,12 +781,7 @@
                 q.txt = `${c.f} จำนวน ${n} mol มีธาตุ ${elem} กี่โมล?`;
                 q.sol1 = factorBox([{top:`${n} mol ${c.f}`, bot:"1"}, {top:`${count} mol ${elem}`, bot:`1 mol ${c.f}`, res:`${q.ans.toFixed(2)} mol`}]);
                 q.desc = `ดูเลขห้อยของ ${elem} ในสูตร คือ ${count}`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>n (โมลสาร) = ${n} mol<br>Sub (เลขห้อย ${elem}) = ${count}`, 
-                    `n(${elem}) = n(สาร) × เลขห้อย`, 
-                    `n(${elem}) = ${n} × ${count}`, 
-                    `${q.ans.toFixed(2)} mol`
-                );
+                q.sol2 = formulaBox(`n=${n}, ห้อย ${elem}=${count}`, `n(${elem}) = n(สาร) × เลขห้อย`, `n = ${n} × ${count}`, `${q.ans.toFixed(2)} mol`);
                 break;
             case 'mw_calc':
                 let logic = []; let sum = 0;
@@ -708,7 +790,7 @@
                     let w = awMap[k] || 1; logic.push(`(${v}×${w})`); sum += v*w; return `${k}=${w}`;
                 }).join(', ');
                 q.ans = sum; q.unit = "g/mol";
-                q.txt = `จงหามวลโมเลกุล (MW) ของ ${c.f} (กำหนด ${formulaStr})`;
+                q.txt = `จงหา${massNameTH} (${massLabel}) ของ ${c.f} (กำหนด ${formulaStr})`;
                 q.sol1 = `<div style="text-align:center; font-size:1.1em;">${logic.join(' + ')}<br>= <b style="color:var(--primary)">${sum} g/mol</b></div>`;
                 q.desc = `นำมวลอะตอมคูณเลขห้อยแล้วบวกกัน`;
                 q.sol2 = `<div>ผลรวม: (เลขห้อย × มวลอะตอม)</div>`;
@@ -718,48 +800,28 @@
                 q.txt = `${c.f}${showMW} (d = ${c.d} g/cm³) มวล ${m_d} g มีปริมาตรกี่ cm³?`;
                 q.sol1 = factorBox([{top:`${m_d} ${u_g} ${c.f}`, bot:"1"}, {top:`1 cm³`, bot:`${c.d} ${u_g} ${c.f}`, res:`${q.ans.toFixed(2)} cm³`}]);
                 q.desc = `ใช้ความหนาแน่นเป็นแฟกเตอร์เปลี่ยนหน่วย`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>m (มวล) = ${m_d} g<br>d (ความหนาแน่น) = ${c.d} g/cm³`, 
-                    `V = m / d <br><small style='color:#cbd5e1'>(V = ปริมาตร)</small>`, 
-                    `V = ${m_d} / ${c.d}`, 
-                    `${q.ans.toFixed(2)} cm³`
-                );
+                q.sol2 = formulaBox(`m=${m_d}, d=${c.d}`, `V = m / d`, `V = ${m_d} / ${c.d}`, `${q.ans.toFixed(2)} cm³`);
                 break;
             case 'density_v_m':
                 let v_d = (n * 5).toFixed(1); q.ans = v_d * c.d; q.unit = "g";
                 q.txt = `${c.f}${showMW} (d = ${c.d} g/cm³) ปริมาตร ${v_d} cm³ มีมวลกี่กรัม?`;
                 q.sol1 = factorBox([{top:`${v_d} <span class="u-canc">cm³</span>`, bot:"1"}, {top:`${c.d} g ${c.f}`, bot:`1 <span class="u-canc">cm³</span>`, res:`${q.ans.toFixed(2)} g`}]);
                 q.desc = `เปลี่ยน cm³ เป็น g ด้วยค่า d`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>V (ปริมาตร) = ${v_d} cm³<br>d (ความหนาแน่น) = ${c.d} g/cm³`, 
-                    `m = V × d <br><small style='color:#cbd5e1'>(m = มวลสาร)</small>`, 
-                    `m = ${v_d} × ${c.d}`, 
-                    `${q.ans.toFixed(2)} g`
-                );
+                q.sol2 = formulaBox(`V=${v_d}, d=${c.d}`, `m = V × d`, `m = ${v_d} × ${c.d}`, `${q.ans.toFixed(2)} g`);
                 break;
             case 'challenge_g_dm3':
-                let gMass = (n*c.mw).toFixed(1); q.ans = (gMass/c.mw)*22.4; q.unit = "dm³";
-                q.txt = `[BONUS] ${c.f}${showMW} มวล ${gMass} g มีปริมาตรกี่ dm³ STP?`;
-                q.sol1 = factorBox([{top:`${gMass} ${u_g} ${c.f}`, bot:"1"}, {top:`1 ${u_mol} ${c.f}`, bot:`${c.mw} ${u_g} ${c.f}`}, {top:`22.4 dm³`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} dm³`}]);
-                q.desc = `ขั้น 1: เปลี่ยน g เป็น mol (หาร MW)<br>ขั้น 2: เปลี่ยน mol เป็น dm³ (คูณ 22.4)`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>m=${gMass} g, MW=${c.mw}, STP=22.4`, 
-                    `Step 1: n = m/MW<br>Step 2: V = n × 22.4`, 
-                    `n = ${gMass}/${c.mw} = ${n} mol<br>V = ${n} × 22.4`, 
-                    `${q.ans.toFixed(2)} dm³`
-                );
+                let gMass = (n*c.mw).toFixed(1); q.ans = (gMass/c.mw)*vFactor; q.unit = vUnit;
+                q.txt = `[BONUS] ${c.f}${showMW} มวล ${gMass} g มีปริมาตรกี่ ${vUnit} STP?`;
+                q.sol1 = factorBox([{top:`${gMass} ${u_g} ${c.f}`, bot:"1"}, {top:`1 ${u_mol} ${c.f}`, bot:`${c.mw} ${u_g} ${c.f}`}, {top:`${vFactor} ${vUnit}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} ${vUnit}`}]);
+                q.desc = `ขั้น 1: เปลี่ยน g เป็น mol (หาร ${massLabel})<br>ขั้น 2: เปลี่ยน mol เป็น ${vUnit} (คูณ ${vFactor})`;
+                q.sol2 = formulaBox(`m=${gMass}, ${massLabel}=${c.mw}, STP=${vFactor}`, `n = m/${massLabel} ... V = n × ${vFactor}`, `n = ${gMass}/${c.mw} = ${n}<br>V = ${n} × ${vFactor}`, `${q.ans.toFixed(2)} ${vUnit}`);
                 break;
             case 'challenge_part_g':
                 let pt = (n * 6.02).toFixed(2); q.ans = (pt/6.02)*c.mw; q.unit = "g";
                 q.txt = `[BONUS] ${c.f}${showMW} จำนวน ${pt}×10²³ ${unit_part} มีมวลกี่กรัม? ${unitNote}`;
                 q.sol1 = factorBox([{top:`${pt}×10²³ ${u_part}`, bot:"1"}, {top:`1 ${u_mol} ${c.f}`, bot:`6.02×10²³ ${u_part}`}, {top:`${c.mw} g ${c.f}`, bot:`1 ${u_mol} ${c.f}`, res:`${q.ans.toFixed(2)} g`}]);
-                q.desc = `ขั้น 1: เปลี่ยนอนุภาคเป็น mol (หาร 6.02..)<br>ขั้น 2: เปลี่ยน mol เป็น g (คูณ MW)`;
-                q.sol2 = formulaBox(
-                    `<b>กำหนดตัวแปร:</b><br>N=${pt}×10²³, MW=${c.mw}`, 
-                    `Step 1: n = N/6.02×10²³<br>Step 2: m = n × MW`, 
-                    `n = ${pt}/6.02 = ${n} mol<br>m = ${n} × ${c.mw}`, 
-                    `${q.ans.toFixed(2)} g`
-                );
+                q.desc = `ขั้น 1: เปลี่ยนอนุภาคเป็น mol (หาร 6.02..)<br>ขั้น 2: เปลี่ยน mol เป็น g (คูณ ${massLabel})`;
+                q.sol2 = formulaBox(`N=${pt}×10²³, ${massLabel}=${c.mw}`, `n = N/(6.02×10²³) ... m = n × ${massLabel}`, `n = ${pt}/6.02 = ${n}<br>m = ${n} × ${c.mw}`, `${q.ans.toFixed(2)} g`);
                 break;
              default: 
                 q.ans = n; q.unit = "mol"; q.txt = "Error"; q.sol1="..."; q.sol2="...";
@@ -768,28 +830,6 @@
         g.q = q;
         document.getElementById('q-topic').innerText = TopicNames[type] || type;
         document.getElementById('q-main').innerHTML = q.txt;
-        
-        document.getElementById('sol-content').innerHTML = `
-            <div style="margin-bottom:15px;">
-                <div style="background:var(--primary); color:white; padding:5px 10px; font-size:0.9em; font-weight:bold; border-radius:5px 5px 0 0;">
-                    วิธีที่ 1: Factor Label (ตัดหน่วย)
-                </div>
-                <div style="border:1px solid var(--primary); padding:15px 10px; border-radius:0 0 5px 5px; background:rgba(255,255,255,0.5);">
-                    ${q.sol1}
-                    <div style="margin-top:10px; font-size:0.9em; color:#475569; border-top:1px dashed #cbd5e1; padding-top:5px;">
-                        💡 ${q.desc || ''}
-                    </div>
-                </div>
-            </div>
-            <div>
-                <div style="background:var(--cyan); color:white; padding:5px 10px; font-size:0.9em; font-weight:bold; border-radius:5px 5px 0 0;">
-                    วิธีที่ 2: Formula (ใช้สูตร)
-                </div>
-                <div style="border:1px solid var(--cyan); padding:10px; border-radius:0 0 5px 5px; background:rgba(255,255,255,0.5);">
-                    ${q.sol2}
-                </div>
-            </div>
-        `;
         
         document.getElementById('ans-in').value = '';
         clearInterval(g.timer); g.tCur = g.tMax; updateTimeBar();
@@ -806,44 +846,78 @@
         
         document.getElementById('tut-ans').innerText = `${g.q.ans.toFixed(2)} ${g.q.unit}`;
         
+        document.getElementById('sol-content').innerHTML = `
+            <div style="margin-bottom:15px;">
+                <div style="background:var(--primary); color:white; padding:5px 10px; font-size:0.9em; font-weight:bold; border-radius:5px 5px 0 0;">
+                    วิธีที่ 1: Factor Label
+                </div>
+                <div style="border:1px solid var(--primary); padding:15px 10px; border-radius:0 0 5px 5px; background:rgba(255,255,255,0.5);">
+                    ${g.q.sol1}
+                    <div style="margin-top:10px; font-size:0.9em; color:#475569; border-top:1px dashed #cbd5e1; padding-top:5px;">
+                        💡 ${g.q.desc || ''}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div style="background:var(--cyan); color:white; padding:5px 10px; font-size:0.9em; font-weight:bold; border-radius:5px 5px 0 0;">
+                    วิธีที่ 2: ใช้สูตร
+                </div>
+                <div style="border:1px solid var(--cyan); padding:10px; border-radius:0 0 5px 5px; background:rgba(255,255,255,0.5);">
+                    ${g.q.sol2}
+                </div>
+            </div>
+        `;
+        
         if(isCor) {
+            g.wrongStreak = 0;
+            g.combo++;
             playSfx('atk');
-            document.getElementById('app').classList.add('anim-correct');
             document.getElementById('hero-img').classList.add('anim-atk-hero');
-            document.getElementById('enemy-img').classList.add('anim-shake');
+            document.getElementById('enemy-img').classList.add('anim-dmg-sprite');
+
+            let earnedXP = Math.floor(g.maxXp * 0.25);
+            g.xp += earnedXP;
+            checkLevelUp();
+            updateHUD();
+
+            if(g.combo >= 3) {
+                let txt = document.getElementById('combo-anim');
+                txt.innerText = `COMBO x${g.combo}!`;
+                txt.classList.remove('anim-combo');
+                void txt.offsetWidth; 
+                txt.classList.add('anim-combo');
+            }
+
             setTimeout(() => {
-                document.getElementById('app').classList.remove('anim-correct');
                 document.getElementById('hero-img').classList.remove('anim-atk-hero');
-                document.getElementById('enemy-img').classList.remove('anim-shake');
+                document.getElementById('enemy-img').classList.remove('anim-dmg-sprite');
             }, 500);
 
-            let praise = PositivePhrases[Math.floor(Math.random() * PositivePhrases.length)];
-            document.getElementById('res-title').innerHTML = `<span style='color:#10b981'>✅ ${praise}</span>`;
-            
+            document.getElementById('res-title').innerHTML = `<span style='color:#10b981'>✅ ถูกต้อง! (+${earnedXP} XP)</span>`;
             document.getElementById('res-reward').style.display = 'block';
-            document.getElementById('res-reward').innerText = "เลือกหีบรางวัลเลย!";
-            document.getElementById('res-btn').innerText = "ไปเลือกรางวัล";
+            document.getElementById('res-reward').innerText = "เลือกหีบรางวัลเพิ่มเติม!";
+            document.getElementById('res-btn').innerText = "เลือกรางวัล";
             document.getElementById('res-btn').onclick = () => {
                 showScreen('scr-chest');
+                document.getElementById('chest-combo-msg').innerText = g.combo>=3 ? `🔥 COMBO x${g.combo} : โอกาสได้ของดีเพิ่ม!` : "";
                 document.getElementById('chest-result').innerHTML = "";
                 document.getElementById('chest-next-btn').style.display = 'none';
                 document.querySelectorAll('.chest-item').forEach(e=>{ e.style.pointerEvents='auto'; e.style.opacity='1'; e.innerText='📦'; });
             };
         } else {
+            g.combo = 0; g.wrongStreak++;
             playSfx('wrong');
             document.getElementById('app').classList.add('anim-shake-screen');
-            document.getElementById('app').classList.add('anim-dmg');
             document.getElementById('enemy-img').classList.add('anim-atk-enemy');
             
             setTimeout(() => {
                 document.getElementById('app').classList.remove('anim-shake-screen');
-                document.getElementById('app').classList.remove('anim-dmg');
                 document.getElementById('enemy-img').classList.remove('anim-atk-enemy');
             }, 500);
 
             g.hp = Math.max(0, g.hp - 10);
             updateHUD();
-            document.getElementById('res-title').innerHTML = "<span style='color:#ef4444'>❌ ผิดจ้า สู้ใหม่นะ!</span>";
+            document.getElementById('res-title').innerHTML = "<span style='color:#ef4444'>❌ ผิดจ้า</span>";
             document.getElementById('res-reward').style.display = 'none';
             document.getElementById('res-btn').innerText = "ไปต่อ";
             document.getElementById('res-btn').onclick = () => { 
@@ -858,51 +932,102 @@
         document.querySelectorAll('.chest-item').forEach((e,idx)=>{ if(idx!==i-1) e.style.opacity='0.3'; });
         
         let rng = Math.random();
-        let xp = g.isBonus ? 40 : 20;
         let msg = "", col = "";
         
-        if(rng < 0.2) {
-            // POISON (20%)
-            g.isPoisoned = true; g.hp-=5; 
-            msg="☠️ กับดักพิษ! (โดนพิษเรื้อรัง)"; col="var(--poison)"; playSfx('wrong');
-        } else if(rng < 0.3) {
-            // CURSE (10%) - NEW
-            g.hp = Math.max(0, g.hp-10);
-            msg="🔮 คำสาปมรณะ! (HP -10 ทันที)"; col="var(--curse)"; playSfx('wrong');
-            document.getElementById('app').classList.add('anim-dmg');
-            setTimeout(() => document.getElementById('app').classList.remove('anim-dmg'), 500);
-        } else if(rng < 0.5) {
-            // HEAL
-            g.hp = Math.min(g.hp+30, g.maxHp); msg="💖 ได้ยาฟื้นเลือด (+30 HP)"; col="#ef4444"; playSfx('win');
-        } else if(rng < 0.7) {
-            // MANA
-            g.mp = Math.min(g.mp+20, g.maxMp); msg="💧 ได้ยามานา (+20 MP)"; col="var(--primary)"; playSfx('win');
-        } else {
-            // EXP
-            g.xp += xp; msg=`✨ ได้รับ EXP (+${xp})`; col="var(--gold)"; playSfx('win');
+        if(rng < 0.02) {
+            // JACKPOT
+            g.xp = 0;
+            g.lv++; g.examScore++; g.maxXp+=5; g.hp=g.maxHp;
+            msg="🎰 JACKPOT! LEVEL UP ทันที!"; col="var(--gold)"; 
+            playSfx('win');
+            updateHUD();
+        }
+        else if(rng < 0.10) {
+            // NEW: Cost Reduction (8% Chance)
+            g.mpCostPer = Math.max(50, g.mpCostPer - 5);
+            msg="📜 คัมภีร์ลดร่ายเวท (ใช้ MP ลดลง 5%)"; col="var(--cyan)";
+            playSfx('win');
+            updateSkillCosts();
+        }
+        else if(rng < 0.20) {
+            let dmg = 5;
+            let note = "";
+            if(g.cls === 'Electro') { dmg = Math.ceil(dmg * 0.5); note = " (Electro ลด 50%)"; } 
+            g.isPoisoned = true; g.hp -= dmg; 
+            msg=`☠️ กับดักพิษ! -${dmg} HP${note}`; col="var(--poison)"; playSfx('wrong');
+        } 
+        else if(rng < 0.30) {
+            let dmg = 10;
+            let note = "";
+            if(g.cls === 'Electro') { dmg = Math.ceil(dmg * 0.5); note = " (Electro ลด 50%)"; }
+            g.hp = Math.max(0, g.hp - dmg);
+            msg=`🔮 คำสาป! -${dmg} HP${note}`; col="var(--curse)"; playSfx('wrong');
+        } 
+        else if(rng < 0.60) {
+            if(Math.random()>0.5) { g.hp = Math.min(g.hp+30, g.maxHp); msg="💖 Potion (+30 HP)"; col="#ef4444"; }
+            else { g.mp = Math.min(g.mp+20, g.maxMp); msg="💧 Mana (+20 MP)"; col="var(--primary)"; }
+            playSfx('win');
+        } 
+        else {
+            let bonusXP = 15;
+            if(g.combo >= 3) bonusXP += 10;
+            g.xp += bonusXP; 
+            msg=`✨ ได้รับ Bonus XP (+${bonusXP})`;
+            col="var(--gold)"; playSfx('win');
         }
         
-        checkLevelUp(); updateHUD();
-        document.getElementById('chest-result').innerHTML = `<span style="color:${col}">${msg}</span>`;
+        checkLevelUp(); 
+        updateHUD();
+        
+        document.getElementById('chest-result').innerHTML = `<span style="color:${col}; font-weight:bold; font-size:1.2em;">${msg}</span>`;
         document.getElementById('chest-next-btn').style.display = 'block';
     }
     
     function finishChest() {
-        if(g.examScore >= g.targetScore) { playSfx('win'); showScreen('scr-win'); }
+        if(g.examScore >= g.targetScore) { 
+            playSfx('win'); 
+            
+            // Winning Logic with Heartfelt Message
+            let pName = document.getElementById('p-name').value || "นักเรียน";
+            document.getElementById('win-msg').innerHTML = `
+                "เก่งมาก <b>${pName}</b>!<br>
+                ครูเห็นความพยายามของเธอมาตลอด ดีใจด้วยนะที่ผ่านบททดสอบนี้ไปได้<br>
+                หนทางข้างหน้าอาจจะยาก แต่ครูเชื่อว่าเธอทำได้แน่นอน<br>
+                ภูมิใจในตัวเองเข้าไว้นะ!"
+            `;
+            
+            // Confetti Effect
+            let c = document.getElementById('confetti-container');
+            c.innerHTML = '';
+            for(let i=0; i<50; i++) {
+                let d = document.createElement('div');
+                d.className = 'confetti';
+                d.style.left = Math.random()*100+'%';
+                d.style.animationDuration = (Math.random()*3+2)+'s';
+                d.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
+                c.appendChild(d);
+            }
+            
+            showScreen('scr-win'); 
+        }
         else { nextQuest(); showScreen('scr-game'); }
     }
 
     function checkLevelUp() {
-        if(g.xp >= g.maxXp) { g.xp-=g.maxXp; g.lv++; g.examScore++; g.maxXp+=5; g.hp=g.maxHp; playSfx('win'); }
+        if(g.xp >= g.maxXp) { 
+            g.xp = g.xp - g.maxXp; 
+            g.lv++; g.examScore++; g.maxXp+=5; g.hp=g.maxHp; 
+            playSfx('win'); 
+        }
     }
 
-    function resetGame() { showScreen('scr-landing'); }
+    function resetGame() { showScreen('scr-landing'); g.combo=0; g.wrongStreak=0; g.mpCostPer=100; updateSkillCosts(); }
     function nextQuest() {
-        // Poison Logic (-2 per turn)
+        if(g.cls === 'Pyro') g.hp = Math.min(g.hp + 2, g.maxHp);
+        if(g.cls === 'Hydro') g.mp = Math.min(g.mp + 2, g.maxMp);
+
         if(g.isPoisoned) { 
             g.hp = Math.max(0, g.hp - 2);
-            document.getElementById('app').classList.add('anim-dmg');
-            setTimeout(() => document.getElementById('app').classList.remove('anim-dmg'), 300);
             if(g.hp<=0) resetGame(); 
         }
         updateHUD(); genQuest();
@@ -912,19 +1037,47 @@
         document.getElementById('hp-bar').style.width = (g.hp/g.maxHp)*100 + '%';
         document.getElementById('mp-bar').style.width = (g.mp/g.maxMp)*100 + '%';
         document.getElementById('xp-bar').style.width = (g.xp/g.maxXp)*100 + '%';
+        
+        document.getElementById('hp-text').innerText = `${Math.ceil(g.hp)}/${g.maxHp}`;
+        document.getElementById('mp-text').innerText = `${Math.ceil(g.mp)}/${g.maxMp}`;
+        document.getElementById('xp-text').innerText = `${Math.ceil(g.xp)}/${g.maxXp}`;
+        
         document.getElementById('lv-txt').innerText = "Lv."+g.lv;
         document.getElementById('score-txt').innerText = g.examScore + " คะแนน";
         document.getElementById('poison-mark').style.display = g.isPoisoned ? 'flex' : 'none';
+        
+        let cDisp = document.getElementById('combo-display');
+        cDisp.style.display = (g.combo >= 2) ? 'block' : 'none';
+        cDisp.innerText = `🔥 Combo x${g.combo}`;
+        
+        document.getElementById('final-score').innerText = g.examScore + " / " + g.targetScore;
+
+        // BOSS HP SCALING & UPDATE
+        let pointsNeeded = Math.max(0, g.targetScore - g.examScore);
+        let maxPointsNeeded = Math.max(1, g.targetScore - g.startScore); // Minimum 1 point range
+        
+        // Progress within current level (XP)
+        let levelProgress = g.xp / g.maxXp; 
+        
+        // Total 'distance' remaining (Points needed minus partial progress from XP)
+        let totalProgress = (pointsNeeded - levelProgress);
+        let pct = (totalProgress / maxPointsNeeded) * 100;
+        pct = Math.max(0, Math.min(100, pct));
+        
+        // Adjust Boss Bar Width based on difficulty (Visual Scale)
+        // If need 1 point -> width small (~20%). If need 14 -> width full (100%)
+        let scaleWidth = Math.min(100, Math.max(20, (maxPointsNeeded / 14) * 100));
+        
+        document.getElementById('boss-hp-frame').style.width = scaleWidth + '%';
+        document.getElementById('boss-hp-bar').style.width = pct + '%';
     }
 
-    // Calc Logic
     function toggleCalc() { 
         let c = document.getElementById('calc'); let game = document.getElementById('scr-game');
         if(c.style.display==='flex'){ 
             c.style.display='none'; game.classList.remove('calc-mode'); 
         } else { 
             c.style.display='flex'; game.classList.add('calc-mode'); 
-            // Copy Current Question to Calc Display
             document.getElementById('calc-q-display').innerHTML = g.q.txt || "โจทย์...";
         }
     }
@@ -933,34 +1086,33 @@
     function cDel(){ let d=document.getElementById('c-disp'); d.value=d.value.slice(0,-1); }
     function cEval(){ try{ let v=eval(document.getElementById('c-disp').value); document.getElementById('c-disp').value=parseFloat(v).toFixed(2); document.getElementById('ans-in').value=parseFloat(v).toFixed(2); }catch{document.getElementById('c-disp').value='Err';} }
 
-    // Skills
     function useSkill(t) {
+        let costHeal = Math.ceil(20 * g.mpCostPer/100);
+        let costTime = Math.ceil(15 * g.mpCostPer/100);
+        let costHint = Math.ceil(10 * g.mpCostPer/100);
+        let costSkip = Math.ceil(30 * g.mpCostPer/100);
+
         if(t==='heal') {
-            if(g.mp < 20) return alert('MP ไม่พอ (ต้องการ 20)');
-            g.mp-=20; g.hp=Math.min(g.hp+50,g.maxHp); g.isPoisoned=false; 
-            updateHUD();
-            document.getElementById('hero-img').classList.add('anim-shake');
-            setTimeout(()=>document.getElementById('hero-img').classList.remove('anim-shake'), 400);
-            playSfx('win');
+            if(g.mp < costHeal) return alert(`MP ไม่พอ (ต้องการ ${costHeal})`);
+            g.mp-=costHeal; g.hp=Math.min(g.hp+50,g.maxHp); g.isPoisoned=false; 
+            updateHUD(); playSfx('win');
         }
         else if(t==='time') {
-            if(g.mp < 15) return alert('MP ไม่พอ (ต้องการ 15)');
-            g.mp-=15; g.tCur = Math.min(g.tCur+30, g.tMax); 
-            updateHUD(); updateTimeBar();
-            playSfx('win');
+            if(g.mp < costTime) return alert(`MP ไม่พอ (ต้องการ ${costTime})`);
+            g.mp-=costTime; g.tCur = Math.min(g.tCur+30, g.tMax); 
+            updateHUD(); updateTimeBar(); playSfx('win');
         }
         else if(t==='skip') {
-            if(g.mp < 30) return alert('MP ไม่พอ (ต้องการ 30)');
-            g.mp-=30; nextQuest();
+            if(g.mp < costSkip) return alert(`MP ไม่พอ (ต้องการ ${costSkip})`);
+            g.mp-=costSkip; nextQuest();
         }
         else if(t==='hint') { 
-            if(g.mp < 10) return alert('MP ไม่พอ (ต้องการ 10)');
-            g.mp-=10; 
-            // NEW SPECIFIC HINT LOGIC
+            if(g.mp < costHint) return alert(`MP ไม่พอ (ต้องการ ${costHint})`);
+            g.mp-=costHint; 
             document.getElementById('q-hint-box').innerHTML = g.q.hintText; 
             document.getElementById('q-hint-box').style.display='block'; updateHUD(); 
         }
     }
-</script>
+</script>	
 </body>
-</html>
+</html>-
